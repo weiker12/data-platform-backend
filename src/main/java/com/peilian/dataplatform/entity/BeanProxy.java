@@ -6,7 +6,11 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Set;
 
-
+/**
+ * 数据库结果集抽象类
+ *
+ * @author zhengshangchao
+ */
 public class BeanProxy {
 
     /**

@@ -109,6 +109,18 @@ public class StatisticsUtil {
     }
 
     public static void main(String[] args) {
-        videoStatistics();
+        String script = "String convert(String percentage) {\n" +
+                "\t\timport java.math.BigDecimal;\n" +
+                "    BigDecimal compute = new BigDecimal(percentage);\n" +
+                "    double result = compute.setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();\n" +
+                "    result = result * 100;\n" +
+                "    return result + \"%\";\n" +
+                "}";
+        Convert convert = ConvertUtils.convert(script);
+        String str = "0.6161";
+        String result = convert.convert(str);
+        System.out.println(result);
     }
+
+
 }

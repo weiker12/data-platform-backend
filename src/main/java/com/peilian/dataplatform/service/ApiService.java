@@ -1,11 +1,13 @@
 package com.peilian.dataplatform.service;
 
-import com.peilian.dataplatform.config.BizException;
-import com.peilian.dataplatform.config.ResultType;
+import com.peilian.dataplatform.enums.ResultType;
 import net.sf.json.JSONObject;
 
 import java.util.List;
 
+/**
+ * @author zhengshangchao
+ */
 public interface ApiService {
 
     /**
@@ -14,6 +16,7 @@ public interface ApiService {
      *
      * @param apiCode
      * @param paramsJson
+     * @throws Exception
      * @return
      */
     List<JSONObject> queryList(String apiCode, String paramsJson) throws Exception;
@@ -24,6 +27,7 @@ public interface ApiService {
      *
      * @param apiCode
      * @param paramsJson
+     * @throws Exception
      * @return
      */
     JSONObject query(String apiCode, String paramsJson) throws Exception;
@@ -35,5 +39,13 @@ public interface ApiService {
      * @return
      */
     ResultType getResultType(String apiCode);
+
+    /**
+     * 通过apiCode获取接口层的表头
+     *
+     * @param apiCode
+     * @return
+     */
+    List<String> getHead(String apiCode);
 
 }

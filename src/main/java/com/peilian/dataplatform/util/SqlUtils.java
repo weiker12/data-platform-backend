@@ -28,8 +28,9 @@ public class SqlUtils {
         log.info("入参sql={}", sql);
         Assert.hasText(sql, "sql入参不能为空！");
         String formatSql = sql.trim().toLowerCase();
-        String paramStr = formatSql.substring("select".length(), formatSql.indexOf("from")).trim();
         Assert.isTrue((formatSql.indexOf("select") == 0) || formatSql.contentEquals("from"), "非select查询语句不合法");
+        String paramStr = formatSql.substring("select".length(), formatSql.indexOf("from")).trim();
+        Assert.isTrue(!paramStr.contains("*"), "sql不能用select * 必须写出具体的字段名");
     }
 
     /**

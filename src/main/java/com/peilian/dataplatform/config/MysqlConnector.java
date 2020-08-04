@@ -6,14 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.jdbc.support.rowset.SqlRowSetMetaData;
-import org.springframework.util.Assert;
 
-import java.sql.ResultSetMetaData;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * 根据mysql数据库连接信息获取数据库操作的jdbcTemplate
@@ -58,7 +53,7 @@ public class MysqlConnector {
      */
     public List<BeanProxy> query(String sql) {
         // 获取查询结果集的返回字段名
-        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, new HashMap<>());
+        SqlRowSet sqlRowSet = jdbcTemplate.queryForRowSet(sql, new HashMap<>(16));
         SqlRowSetMetaData metaData = sqlRowSet.getMetaData();
         int count = metaData.getColumnCount();
         final String[] columnNames = new String[count];

@@ -4,7 +4,7 @@ import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiRobotSendRequest;
 import com.dingtalk.api.response.OapiRobotSendResponse;
-import com.peilian.dataplatform.entity.MailSend;
+import com.peilian.dataplatform.dto.MailSend;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +15,9 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
 
+/**
+ * @author zhengshangchao
+ */
 @Slf4j
 @Component
 public class RestClient {

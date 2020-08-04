@@ -1,0 +1,268 @@
+package com.peilian.dataplatform.service.impl;
+
+import com.peilian.dataplatform.config.BizException;
+import com.peilian.dataplatform.dto.ApiSourceDto;
+import com.peilian.dataplatform.dto.DataSourceDto;
+import com.peilian.dataplatform.entity.ApiSource;
+import com.peilian.dataplatform.entity.DataConvert;
+import com.peilian.dataplatform.entity.DataFlow;
+import com.peilian.dataplatform.entity.DataSource;
+import com.peilian.dataplatform.repository.ApiSourceRepository;
+import com.peilian.dataplatform.repository.DataConvertRepository;
+import com.peilian.dataplatform.repository.DataFlowRepository;
+import com.peilian.dataplatform.repository.DataSourceRepository;
+import com.peilian.dataplatform.service.ApiConfigService;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
+
+import javax.persistence.criteria.Predicate;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+
+/**
+ * 数据报表api接口信息配置接口实现类
+ *
+ * @author zhengshangchao
+ */
+@Slf4j
+@Service("apiConfigService")
+public class ApiConfigServiceImpl implements ApiConfigService {
+
+    @Autowired
+    DataSourceRepository dataSourceRepository;
+
+    @Autowired
+    ApiSourceRepository apiSourceRepository;
+
+    @Autowired
+    DataFlowRepository dataFlowRepository;
+
+    @Autowired
+    DataConvertRepository dataConvertRepository;
+
+    /**
+     * 根据查询条件apiCode和apiName返回接口信息
+     * 其中dsCode是模糊查询
+     *
+     * @param dsCode
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<DataSource> getDataSourceList(final String dsCode, Pageable pageable) {
+        log.info("入参dsCode={}", dsCode);
+        Specification<DataSource> specification = (Specification<DataSource>) (root, query, cb) -> {
+            // 添加查询条件，apiCode为精确查询apiName为模糊查询
+            List<Predicate> predicates = new ArrayList<>();
+            if(StringUtils.isNotBlank(dsCode)) {
+                predicates.add(cb.like(root.get("dsCode").as(String.class), "%" + dsCode + "%"));
+            }
+            // 创建一个查询条件的集合，长度为满足上述两个条件的个数
+            Predicate[] pre = new Predicate[predicates.size()];
+            // 查询结果排序g规则设置为根据id倒序排列
+            query.orderBy(cb.desc(root.get("id")));
+            // 将上面拼接好的条件返回
+            return query.where(predicates.toArray(pre)).getRestriction();
+        };
+        Page<DataSource> page = dataSourceRepository.findAll(specification, pageable);
+        List<DataSource> dataSources = page.getContent();
+        // 数据库密码脱敏处理
+        dataSources.stream().forEach(dataSource -> {
+            dataSource.setPassword(dataSource.getPassword().replaceAll("\\w", "*"));
+        });
+        log.info("查询结果返回dataSourceList={}", page);
+        return page;
+    }
+
+    /**
+     * 获取数据源列表
+     *
+     * @return
+     */
+    @Override
+    public List<DataSource> getDataSourceList() {
+        List<DataSource> dataSourceList = dataSourceRepository.findAll();
+        return dataSourceList;
+    }
+
+    /**
+     * 根据查询条件apiCode和apiName返回接口信息
+     * 其中apiCode是精确查询，apiName是模糊查询
+     *
+     * @param apiCode
+     * @param apiName
+     * @param pageable
+     * @return
+     */
+    @Override
+    public Page<ApiSource> getApiInfoList(String apiCode, String apiName, Pageable pageable) {
+        log.info("入参apiCode={}, apiName={}", apiCode, apiName);
+        Specification<ApiSource> specification = (Specification<ApiSource>) (root, query, cb) -> {
+            // 添加查询条件，apiCode为精确查询apiName为模糊查询
+            List<Predicate> predicates = new ArrayList<>();
+            if(StringUtils.isNotBlank(apiCode)) {
+                predicates.add(cb.equal(root.get("apiCode").as(String.class), apiCode));
+            }
+            if(StringUtils.isNotBlank(apiName)) {
+                predicates.add(cb.like(root.get("apiName").as(String.class), "%" + apiName + "%"));
+            }
+            // 创建一个查询条件的集合，长度为满足上述两个条件的个数
+            Predicate[] pre = new Predicate[predicates.size()];
+            // 查询结果排序g规则设置为根据id倒序排列
+            query.orderBy(cb.desc(root.get("id")));
+            // 将上面拼接好的条件返回
+            return query.where(predicates.toArray(pre)).getRestriction();
+        };
+        Page<ApiSource> page = apiSourceRepository.findAll(specification, pageable);
+        log.info("查询结果返回apiSourceList={}", page);
+        return page;
+    }
+
+    /**
+     * 获取数据源详情
+     *
+     * @param id
+     * @return
+     */
+    @Override
+    public DataSource getDataSource(Long id) {
+        log.info("id={}", id);
+        Optional<DataSource> dataSource = dataSourceRepository.findById(id);
+        DataSource dataSource1 = dataSource.get();
+        // 数据库密码脱敏处理
+        dataSource1.setPassword(dataSource1.getPassword().replaceAll("\\w", "*"));
+        return dataSource1;
+    }
+
+    /**
+     * 获取接口信息详情
+     *
+     * @param apiCode
+     * @return
+     */
+    @Override
+    public ApiSourceDto getApiInfo(String apiCode) {
+        log.info("入参apiCode={}", apiCode);
+        ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
+        Assert.notNull(apiCode, String.format("%s不存在api_source配置信息", apiCode));
+        List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);
+        List<DataConvert> dataConvertList = dataConvertRepository.findByApiCode(apiCode);
+        dataFlowList = CollectionUtils.isEmpty(dataFlowList) ? new ArrayList<>() : dataFlowList;
+        dataConvertList = CollectionUtils.isEmpty(dataConvertList) ? new ArrayList<>() : dataConvertList;
+        ApiSourceDto dto = new ApiSourceDto();
+        BeanUtils.copyProperties(apiSource, dto);
+        dto.setDataFlowList(dataFlowList);
+        dto.setDataConvertList(dataConvertList);
+        return dto;
+    }
+
+    /**
+     * 新增或者更新数据源配置信息
+     *
+     * @param dataSourceDto
+     * @throws BizException
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveDataSource(DataSourceDto dataSourceDto) throws BizException {
+        log.info("入参dataSourceDto={}", dataSourceDto);
+        Long id = dataSourceDto.getId();
+        String dsCode = dataSourceDto.getDsCode();
+        DataSource dataSource = dataSourceRepository.findByDsCode(dsCode);
+        // 校验dsCode命名是否有冲突
+        if(dataSource != null && !dataSource.getId().equals(id)) {
+            throw new BizException("dsCode在数据源配置中已存在！");
+        }
+        if(null == id) {
+            // 新增数据源信息
+            DataSource ds = new DataSource();
+            BeanUtils.copyProperties(dataSourceDto, ds);
+            dataSourceRepository.save(ds);
+        } else {
+            DataSource dataSource1 = dataSourceRepository.findById(id).get();
+            BeanUtils.copyProperties(dataSourceDto, dataSource1);
+            dataSourceRepository.save(dataSource1);
+        }
+    }
+
+    /**
+     * 新增或者更新接口配置信息
+     *
+     * @param apiSourceDto
+     * @throws BizException
+     * @return
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void saveApiInfo(ApiSourceDto apiSourceDto) throws BizException {
+        String apiCode = apiSourceDto.getApiCode();
+        Long id = apiSourceDto.getId();
+        ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
+        // 校验apiCode是否重复
+        if(apiSource != null && !apiSource.getId().equals(id)) {
+            throw new BizException("apiCode在数据源配置中已存在");
+        }
+        if(null == id) {
+            // 新增接口配置信息
+            apiSource = new ApiSource();
+            BeanUtils.copyProperties(apiSourceDto, apiSource);
+            apiSourceRepository.save(apiSource);
+        } else {
+            ApiSource apiSource1 = apiSourceRepository.findById(id).get();
+            BeanUtils.copyProperties(apiSourceDto, apiSource1);
+            apiSourceRepository.save(apiSource1);
+        }
+        // 保存dataFlow信息
+        List<DataFlow> dataFlows = apiSourceDto.getDataFlowList();
+        dataFlowRepository.deleteByApiCode(apiCode);
+        if(!CollectionUtils.isEmpty(dataFlows)) {
+            dataFlows.stream().forEach(dataFlow -> dataFlow.setApiCode(apiCode));
+            dataFlowRepository.saveAll(dataFlows);
+        }
+        // 保存dataConvert信息
+        List<DataConvert> dataConverts = apiSourceDto.getDataConvertList();
+        dataConvertRepository.deleteByApiCode(apiCode);
+        if(!CollectionUtils.isEmpty(dataConverts)) {
+            dataConverts.stream().forEach(dataConvert -> dataConvert.setApiCode(apiCode));
+            dataConvertRepository.saveAll(dataConverts);
+        }
+    }
+
+    /**
+     * 根据id删除数据源配置信息
+     *
+     * @param id
+     */
+    @Override
+    public void delDataSource(Long id) {
+        log.info("入参id={}", id);
+        dataSourceRepository.deleteById(id);
+    }
+
+    /**
+     * 根据apiCode删除api配置信息
+     *
+     * @param apiCode
+     */
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void delApiInfo(String apiCode) {
+        log.info("入参apiCode={}", apiCode);
+        apiSourceRepository.deleteByApiCode(apiCode);
+        dataFlowRepository.deleteByApiCode(apiCode);
+        dataConvertRepository.deleteByApiCode(apiCode);
+    }
+
+}

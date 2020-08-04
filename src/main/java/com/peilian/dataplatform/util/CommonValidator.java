@@ -2,6 +2,7 @@ package com.peilian.dataplatform.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
@@ -29,10 +30,10 @@ public class CommonValidator<T> {
     /**
      * 抛出校验异常
      *
-     * @param vo
+     * @param dto
      */
-    public void checkDto(T vo) {
-        String validateResult = check(vo);
+    public void checkDto(T dto) {
+        String validateResult = check(dto);
         if (!CommonValidator.VALIDATION_SUCCESS.equals(validateResult)) {
             log.error("校验失败：" + validateResult);
             throw new IllegalArgumentException("校验失败：" + validateResult);
@@ -42,17 +43,15 @@ public class CommonValidator<T> {
     /**
      * 校验前端传来的数据对象
      *
-     * @param vo
+     * @param dto
      * @return String
      * @author zhengshangchao
      * @date 2020年2月12日
      */
-    private String check(T vo) {
-        if (null == vo) {
-            return "对象为空";
-        }
+    private String check(T dto) {
+        Assert.notNull(dto, "对象为空");
         List<String> result = new ArrayList<>();
-        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(vo);
+        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(dto);
         if (!violations.isEmpty()) {
             for (ConstraintViolation<T> va : violations) {
                 result.add(va.getInvalidValue() + ":" + va.getMessage());

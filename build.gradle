@@ -23,6 +23,9 @@ repositories {
     maven {
         url "https://maven.restlet.com"
     }
+    maven {
+        url "http://nexus.miaokecloud.com/repository/java-release/"
+    }
 }
 
 dependencies {
@@ -39,7 +42,9 @@ dependencies {
     compile group: 'org.hibernate', name: 'hibernate-validator', version: '6.1.5.Final'
     compile group : 'io.jsonwebtoken', name: 'jjwt', version: '0.6.0'
     compile group: 'com.aliyun', name: 'alibaba-dingtalk-service-sdk', version: '1.0.1'
+    compile group: 'com.alibaba', name: 'easyexcel', version: '2.2.6'
     compile group: 'javax.jms', name: 'jms', version: '1.1'
+    compile 'com.peilian.common-api:job-core:1.0.3'
     annotationProcessor 'org.projectlombok:lombok:1.18.2'
     compileOnly 'org.projectlombok:lombok:1.18.2'
 }

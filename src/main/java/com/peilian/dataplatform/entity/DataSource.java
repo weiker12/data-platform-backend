@@ -1,6 +1,9 @@
 package com.peilian.dataplatform.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -9,12 +12,13 @@ import java.time.LocalDateTime;
 /**
  * 数据源配置表(DataSource)实体类
  *
- * @author makejava
+ * @author zhengshangchao
  * @since 2020-07-27 15:16:35
  */
 @Data
 @Table(name = "data_source")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class DataSource implements Serializable {
 
     private static final long serialVersionUID = -83465630700065383L;
@@ -48,14 +52,17 @@ public class DataSource implements Serializable {
     @Column(name = "url")
     private String url;
     /**
-     * 创建时间
+     * 最近创建时间
      */
     @Column(name = "create_time")
+    @CreatedDate
     private LocalDateTime createTime;
+
     /**
-     * 更新时间
+     * 最近更新时间
      */
     @Column(name = "update_time")
+    @LastModifiedDate
     private LocalDateTime updateTime;
 
 }

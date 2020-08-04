@@ -1,9 +1,13 @@
 package com.peilian.dataplatform.entity;
 
 import lombok.Data;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -15,6 +19,7 @@ import java.util.Date;
 @Data
 @Table(name = "api_source")
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class ApiSource implements Serializable {
 
     private static final long serialVersionUID = 641172262709160535L;
@@ -56,14 +61,22 @@ public class ApiSource implements Serializable {
     @Column(name = "query_sql")
     private String querySql;
     /**
-     * 更新时间
+     * 是否发送 1-发送 0-不发送
      */
-    @Column(name = "update_time")
-    private Date updateTime;
+    @Column(name = "to_send")
+    private Integer toSend;
     /**
-     * 创建时间
+     * 最近创建时间
      */
     @Column(name = "create_time")
-    private Date createTime;
+    @CreatedDate
+    private LocalDateTime createTime;
+
+    /**
+     * 最近更新时间
+     */
+    @Column(name = "update_time")
+    @LastModifiedDate
+    private LocalDateTime updateTime;
 
 }

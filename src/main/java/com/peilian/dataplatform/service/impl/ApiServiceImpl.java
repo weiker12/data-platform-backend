@@ -1,13 +1,18 @@
-package com.peilian.dataplatform.service;
+package com.peilian.dataplatform.service.impl;
 
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.peilian.dataplatform.config.*;
 import com.peilian.dataplatform.entity.*;
+import com.peilian.dataplatform.enums.CollectionType;
+import com.peilian.dataplatform.enums.ResultType;
+import com.peilian.dataplatform.enums.SendType;
+import com.peilian.dataplatform.enums.StatusType;
 import com.peilian.dataplatform.repository.ApiSourceRepository;
 import com.peilian.dataplatform.repository.DataConvertRepository;
 import com.peilian.dataplatform.repository.DataFlowRepository;
 import com.peilian.dataplatform.repository.DataSourceRepository;
+import com.peilian.dataplatform.service.ApiService;
 import com.peilian.dataplatform.util.Convert;
 import com.peilian.dataplatform.util.ConvertUtils;
 import com.peilian.dataplatform.util.RestClient;
@@ -70,11 +75,13 @@ public class ApiServiceImpl implements ApiService {
      * 4. 将替换参数的sql发给查询器查询
      * 5. 获取查询结果并检查字段值是否需要做特殊处理
      * 6. 如果data_convert表对该apiCode有bsh脚本配置则加载bsh脚本对字段进行特殊处理
-     * 7. 将最终结果返回
+     * 7. 通过to_send判断是否发送通知
+     * 8. 将最终结果返回给接口
      *
      * @param apiCode
      * @param paramsJson
      * @return
+     * @throws Exception
      */
     @Override
     public List<JSONObject> queryList(String apiCode, String paramsJson) throws Exception {
@@ -85,7 +92,7 @@ public class ApiServiceImpl implements ApiService {
         // 通过ds_code查询数据库配置信息
         DataSource dataSource = dataSourceRepository.findByDsCode(apiSource.getDsCode());
         String querySql = apiSource.getQuerySql();
-        // 获取分片
+        // 获取分片信息
         List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);
         // 获取参数map
         Map<String, Object> paramMap = (Map<String, Object>) JSONObject.toBean(JSONObject.fromObject(paramsJson), Map.class);
@@ -104,9 +111,9 @@ public class ApiServiceImpl implements ApiService {
                 jsonObjects = list.stream().filter(Objects::nonNull).map(beanProxy -> beanProxy.getData()).collect(Collectors.toList());
                 String collectionType = dataFlow.getCollectionType();
                 // 根据配置的sql返回集合类型分别处理
-                if (CollectionType.ALL.getType().equals(collectionType)) {
+                if (CollectionType.ALL.getCode().equals(collectionType)) {
                     allSet.addAll(jsonObjects);
-                } else if (CollectionType.SUB.getType().equals(collectionType)) {
+                } else if (CollectionType.SUB.getCode().equals(collectionType)) {
                     // sub集合进行去重union操作
                     subSet.addAll(jsonObjects);
                 } else {
@@ -127,9 +134,11 @@ public class ApiServiceImpl implements ApiService {
         // 根据apiCode查找bsh脚本的配置信息对特殊字段进行逻辑处理
         dataConvert(apiCode, jsonObjects);
         log.info("apiCode={}处理完毕，产生{}条数据", apiCode, jsonObjects.size());
-        // 发送通知
-        sendMail(jsonObjects);
-        sendDingTalk(jsonObjects);
+        // 校验to_send开关是否打开，如果打开则发送消息
+        if (SendType.YES.getCode().equals(apiSource.getToSend())) {
+            sendMail(jsonObjects, apiSource.getApiName());
+            sendDingTalk(jsonObjects);
+        }
         return jsonObjects;
     }
 
@@ -140,6 +149,7 @@ public class ApiServiceImpl implements ApiService {
      * @param apiCode
      * @param paramsJson
      * @return
+     * @throws Exception
      */
     @Override
     public JSONObject query(String apiCode, String paramsJson) throws Exception {
@@ -160,8 +170,40 @@ public class ApiServiceImpl implements ApiService {
         Assert.hasText(apiCode, "入参apiCode不能为空！");
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
         Assert.notNull(apiSource, "apiCode的配置为空！请配置api_source表");
-        ResultType resultType = ResultType.valueOf(apiSource.getResultType());
-        return resultType;
+        return ResultType.getByCode(apiSource.getResultType());
+    }
+
+    /**
+     * 获取接口字段的表头信息
+     *
+     * @param apiCode
+     * @return
+     */
+    @Override
+    public List<String> getHead(String apiCode) {
+        // 通过api_code查询接口的数据源和表数据配置信息
+        ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
+        Assert.notNull(apiSource, "接口配置信息apiSource配置不能为空！");
+        String querySql = apiSource.getQuerySql();
+        // 获取分片信息
+        List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);
+        if(StringUtils.isEmpty(querySql)) {
+            Assert.notEmpty(dataFlowList, "分片sql信息配置dataFlowList不能为空！");
+        }
+        // api字段值
+        List<String> fields = new ArrayList<>();
+        if (org.apache.commons.lang.StringUtils.isNotBlank(querySql)) {
+            // 从配置的sql中读取sql字段值
+            fields.addAll(SqlUtils.getFields(querySql));
+        } else {
+            // 从分片sql中读取字段值
+            fields = dataFlowList.stream().map(flow -> {
+                String sql = flow.getQuerySql();
+                List<String> list = SqlUtils.getFields(sql);
+                return list;
+            }).flatMap(Collection::stream).distinct().collect(Collectors.toList());
+        }
+        return fields;
     }
 
 
@@ -180,13 +222,12 @@ public class ApiServiceImpl implements ApiService {
         // 校验api_source表配置信息
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
         Assert.notNull(apiSource, "apiCode的配置为空！请配置api_source表");
-        Assert.isTrue(StatusType.YES.getStatus() == apiSource.getStatus(), "该接口配置已下架，请打开api_source表的配置status=1");
-
+        Assert.isTrue(StatusType.YES.getCode().equals(apiSource.getStatus()), "该接口配置已下架，请打开api_source表的配置status=1");
         // 校验data_source表配置信息
         String dsCode = apiSource.getDsCode();
         DataSource dataSource = dataSourceRepository.findByDsCode(dsCode);
         Assert.notNull(dataSource, "数据源配置不能为空！请配置data_source表");
-        Assert.isTrue(StatusType.YES.getStatus() == dataSource.getStatus(), "该接口配置已下架，请打开dataSource表的配置status=1");
+        Assert.isTrue(StatusType.YES.getCode().equals(dataSource.getStatus()), "该接口配置已下架，请打开dataSource表的配置status=1");
 
         // 校验data_flow表配置信息
         List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);
@@ -221,7 +262,10 @@ public class ApiServiceImpl implements ApiService {
      * @param jsonObjects
      */
     private void dataConvert(String apiCode, List<JSONObject> jsonObjects) {
-        log.info("apiCode={}进行dataConvert转换处理");
+        log.info("apiCode={}进行dataConvert转换处理", apiCode);
+        if (CollectionUtils.isEmpty(jsonObjects)) {
+            return;
+        }
         // 根据apiCode查找bsh脚本的配置信息对特殊字段进行逻辑处理
         List<DataConvert> convertList = dataConvertRepository.findByApiCode(apiCode);
         if (!CollectionUtils.isEmpty(convertList)) {
@@ -248,10 +292,10 @@ public class ApiServiceImpl implements ApiService {
      *
      * @param jsonObjects
      */
-    private void sendMail(List<JSONObject> jsonObjects) throws Exception {
+    private void sendMail(List<JSONObject> jsonObjects, String apiName) throws Exception {
         File mailFile = ResourceUtils.getFile(mailStyle);
         String mailStyle = Files.readLines(mailFile, Charsets.UTF_8).stream().reduce((line1, line2) -> line1 + line2).get();
-        String content = getMailHtmlContent(jsonObjects);
+        String content = getMailHtmlContent(jsonObjects, apiName);
         content = mailStyle.replaceAll("#content", content);
         //  发送邮件
         restClient.sendMail(sendTo, content);
@@ -274,11 +318,15 @@ public class ApiServiceImpl implements ApiService {
      * 根据json拼接html的表单
      *
      * @param jsonObjects
+     * @param tableTitle
      * @return
      */
-    private String getMailHtmlContent(List<JSONObject> jsonObjects) {
+    private String getMailHtmlContent(List<JSONObject> jsonObjects, String tableTitle) {
         String tr = "";
         StringBuffer th = new StringBuffer();
+        if (jsonObjects.isEmpty()) {
+            return String.format("%s \n本次统计数据为空", tableTitle);
+        }
         jsonObjects.get(0).keySet().stream().forEach(key -> {
             th.append(String.format("<th> %s </th> \n", key));
         });
@@ -290,7 +338,8 @@ public class ApiServiceImpl implements ApiService {
             }
             tr += String.format("<tr> \n %s </tr>", td);
         }
-        String content = String.format("<table> \n<tr> \n %s \n</tr> \n %s \n </table>", th, tr);
+        String caption = String.format("<caption> %s </caption>", tableTitle);
+        String content = String.format("<table> \n %s \n<tr> \n %s \n</tr> \n %s \n </table>", caption, th, tr);
         return content;
     }
 
