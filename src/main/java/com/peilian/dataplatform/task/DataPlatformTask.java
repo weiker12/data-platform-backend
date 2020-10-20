@@ -2,6 +2,7 @@ package com.peilian.dataplatform.task;
 
 import com.peilian.dataplatform.config.ResponseMessage;
 import com.peilian.dataplatform.controller.ApiController;
+import com.peilian.dataplatform.dto.DataDto;
 import com.peilian.job.core.biz.model.ReturnT;
 import com.peilian.job.core.handler.IJobHandler;
 import com.peilian.job.core.handler.annotation.JobHandler;
@@ -41,7 +42,10 @@ public class DataPlatformTask extends IJobHandler {
         Assert.hasText(apiCode, "apiCode不能为空");
         json.remove("apiCode");
         // 开始调起任务
-        ResponseMessage responseMessage = apiController.getData(apiCode, json.toString());
+        DataDto dataDto = new DataDto();
+        dataDto.setApiCode(apiCode);
+        dataDto.setParamsJson(json);
+        ResponseMessage responseMessage = apiController.getData(dataDto);
         long endTime = System.currentTimeMillis();
         log.info(String.format("调用成功，共耗时：%ds", (endTime - startTime) / 1000));
         ReturnT<String> returnT = new ReturnT<>();

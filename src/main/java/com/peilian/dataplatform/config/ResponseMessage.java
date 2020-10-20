@@ -34,6 +34,6 @@ public class ResponseMessage<T> {
     }
 
     public boolean isOk() {
-        return this.code.equals(ResponseMessageCodeEnum.OK.getCode());
+        return this.code.equals(ResponseMessageCode.OK.getCode());
     }
 }

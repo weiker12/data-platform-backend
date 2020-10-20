@@ -7,8 +7,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @author zhengshangchao
@@ -22,8 +21,8 @@ public class StatisticsUtil {
      * @return
      * @throws IOException
      */
-    public static List<String> readToList(String filePath) throws IOException {
-        List<String> list = new ArrayList<>();
+    public static Set<String> readToList(String filePath) throws IOException {
+        Set<String> list = new HashSet<>();
         InputStream is = new FileInputStream(filePath);
         BufferedReader reader = new BufferedReader(new InputStreamReader(is));
         String line = reader.readLine();
@@ -66,12 +65,13 @@ public class StatisticsUtil {
         String shengwangAudio = "/Users/zhengshangchao/Desktop/声网音频.txt";
         String wangke = "/Users/zhengshangchao/Desktop/完课.txt";
         try {
-            List<String> tengxunAudios = readToList(tengxunAudio);
+            Set<String> tengxunAudios = readToList(tengxunAudio);
             System.out.println("当天腾讯音频文件的条数为:" + tengxunAudios.size());
-            List<String> shengwangAudios = readToList(shengwangAudio);
+            Set<String> shengwangAudios = readToList(shengwangAudio);
             System.out.println("当天声网音频文件的条数为：" + shengwangAudios.size());
-            List<String> wankeList = readToList(wangke);
-            List<String> normalList = (List<String>) CollectionUtils.union(tengxunAudios, shengwangAudios);
+            Set<String> wankeList = readToList(wangke);
+            System.out.println("当天完课的音频条数为：" + wankeList.size());
+            Collection<String> normalList = CollectionUtils.union(tengxunAudios, shengwangAudios);
             System.out.println("当天正常的音频条数为：" + normalList.size());
             List<String> resultList = (List<String>) CollectionUtils.subtract(wankeList, normalList);
             System.out.println("当天完课音频条数 - 当天正常的音频条数 = 当天异常音频条数：" + resultList.size());
@@ -91,13 +91,13 @@ public class StatisticsUtil {
         String shengwangAudio = "/Users/zhengshangchao/Desktop/声网视频.txt";
         String wangke = "/Users/zhengshangchao/Desktop/完课.txt";
         try {
-            List<String> tengxunAudios = readToList(tengxunAudio);
+            Set<String> tengxunAudios = readToList(tengxunAudio);
             System.out.println("当天腾讯视频文件的条数为:" + tengxunAudios.size());
-            List<String> shengwangAudios = readToList(shengwangAudio);
+            Set<String> shengwangAudios = readToList(shengwangAudio);
             System.out.println("当天声网视频文件的条数为：" + shengwangAudios.size());
-            List<String> wankeList = readToList(wangke);
+            Set<String> wankeList = readToList(wangke);
             List<String> normalList = (List<String>) CollectionUtils.union(tengxunAudios, shengwangAudios);
-            System.out.println("当天正常的视频条数为：" + normalList.size());
+            System.out.println("当天完课的视频条数为：" + wankeList.size());
             List<String> resultList = (List<String>) CollectionUtils.subtract(wankeList, normalList);
             System.out.println("当天完课视频条数 - 当天正常的视频条数 = 当天异常视频条数：" + resultList.size());
             String filePath = "/Users/zhengshangchao/Desktop/视频异常结果.txt";
@@ -109,17 +109,7 @@ public class StatisticsUtil {
     }
 
     public static void main(String[] args) {
-        String script = "String convert(String percentage) {\n" +
-                "\t\timport java.math.BigDecimal;\n" +
-                "    BigDecimal compute = new BigDecimal(percentage);\n" +
-                "    double result = compute.setScale(4, BigDecimal.ROUND_HALF_UP).doubleValue();\n" +
-                "    result = result * 100;\n" +
-                "    return result + \"%\";\n" +
-                "}";
-        Convert convert = ConvertUtils.convert(script);
-        String str = "0.6161";
-        String result = convert.convert(str);
-        System.out.println(result);
+        audioStatistics();
     }
 
 

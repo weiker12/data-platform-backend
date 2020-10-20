@@ -1,8 +1,7 @@
 package com.peilian.dataplatform.service;
 
 import com.peilian.dataplatform.config.BizException;
-import com.peilian.dataplatform.dto.ApiSourceDto;
-import com.peilian.dataplatform.dto.DataSourceDto;
+import com.peilian.dataplatform.dto.*;
 import com.peilian.dataplatform.entity.ApiSource;
 import com.peilian.dataplatform.entity.DataSource;
 import org.springframework.data.domain.Page;
@@ -21,11 +20,10 @@ public interface ApiConfigService {
      * 根据查询条件apiCode和apiName返回接口信息
      * 其中dsCode是模糊查询
      *
-     * @param dsCode
-     * @param pageable
+     * @param dataSourceListDto
      * @return Page<DataSource>
      */
-    Page<DataSource> getDataSourceList(String dsCode, Pageable pageable);
+    Page<DataSource> getDataSourceList(DataSourceListDto dataSourceListDto);
 
     /**
      * 获取数据源配置列表
@@ -38,12 +36,10 @@ public interface ApiConfigService {
      * 根据查询条件apiCode和apiName返回接口信息
      * 其中apiCode是精确查询，apiName是模糊查询
      *
-     * @param apiCode
-     * @param apiName
-     * @param pageable
+     * @param apiInfoListDto
      * @return Page<ApiSource>
      */
-    Page<ApiSource> getApiInfoList(String apiCode, String apiName, Pageable pageable);
+    Page<ApiSource> getApiInfoList(ApiInfoListDto apiInfoListDto);
 
     /**
      * 获取数据源详情

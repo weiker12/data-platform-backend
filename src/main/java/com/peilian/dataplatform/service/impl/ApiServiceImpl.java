@@ -1,8 +1,9 @@
 package com.peilian.dataplatform.service.impl;
 
-import com.google.common.base.Charsets;
-import com.google.common.io.Files;
-import com.peilian.dataplatform.config.*;
+import com.peilian.dataplatform.config.BizException;
+import com.peilian.dataplatform.config.MysqlConnector;
+import com.peilian.dataplatform.config.MysqlFactory;
+import com.peilian.dataplatform.dto.DataDto;
 import com.peilian.dataplatform.entity.*;
 import com.peilian.dataplatform.enums.CollectionType;
 import com.peilian.dataplatform.enums.ResultType;
@@ -15,7 +16,7 @@ import com.peilian.dataplatform.repository.DataSourceRepository;
 import com.peilian.dataplatform.service.ApiService;
 import com.peilian.dataplatform.util.Convert;
 import com.peilian.dataplatform.util.ConvertUtils;
-import com.peilian.dataplatform.util.RestClient;
+import com.peilian.dataplatform.util.MailRest;
 import com.peilian.dataplatform.util.SqlUtils;
 import lombok.extern.slf4j.Slf4j;
 import net.sf.json.JSONObject;
@@ -24,10 +25,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.ResourceUtils;
 import org.springframework.util.StringUtils;
 
-import java.io.File;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,9 +40,6 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service("apiService")
 public class ApiServiceImpl implements ApiService {
-
-    @Value("${mail.style.address}")
-    private String mailStyle;
 
     @Value("${mail.sendTo.address}")
     private String sendTo;
@@ -64,7 +60,7 @@ public class ApiServiceImpl implements ApiService {
     private DataFlowRepository dataFlowRepository;
 
     @Autowired
-    private RestClient restClient;
+    private MailRest mailRest;
 
     /**
      * 根据接口代码和传参进行信息查询
@@ -78,13 +74,14 @@ public class ApiServiceImpl implements ApiService {
      * 7. 通过to_send判断是否发送通知
      * 8. 将最终结果返回给接口
      *
-     * @param apiCode
-     * @param paramsJson
+     * @param dataDto
      * @return
      * @throws Exception
      */
     @Override
-    public List<JSONObject> queryList(String apiCode, String paramsJson) throws Exception {
+    public List<JSONObject> queryList(DataDto dataDto) throws Exception {
+        String apiCode = dataDto.getApiCode();
+        String paramsJson = dataDto.getParamsJson().toString();
         // 检查配置信息
         checkConfig(apiCode, paramsJson);
         // 通过api_code查询接口的数据源和表数据配置信息
@@ -146,14 +143,13 @@ public class ApiServiceImpl implements ApiService {
     /**
      * 返回object类型
      *
-     * @param apiCode
-     * @param paramsJson
+     * @param dataDto
      * @return
      * @throws Exception
      */
     @Override
-    public JSONObject query(String apiCode, String paramsJson) throws Exception {
-        List<JSONObject> resultList = queryList(apiCode, paramsJson);
+    public JSONObject query(DataDto dataDto) throws Exception {
+        List<JSONObject> resultList = queryList(dataDto);
         return CollectionUtils.isEmpty(resultList) ? new JSONObject() : resultList.get(0);
     }
 
@@ -293,12 +289,11 @@ public class ApiServiceImpl implements ApiService {
      * @param jsonObjects
      */
     private void sendMail(List<JSONObject> jsonObjects, String apiName) throws Exception {
-        File mailFile = ResourceUtils.getFile(mailStyle);
-        String mailStyle = Files.readLines(mailFile, Charsets.UTF_8).stream().reduce((line1, line2) -> line1 + line2).get();
+        String mailStyle = mailRest.getHtmlContent();
         String content = getMailHtmlContent(jsonObjects, apiName);
         content = mailStyle.replaceAll("#content", content);
         //  发送邮件
-        restClient.sendMail(sendTo, content);
+        mailRest.sendMail(sendTo, content);
     }
 
     /**
@@ -310,7 +305,7 @@ public class ApiServiceImpl implements ApiService {
     private void sendDingTalk(List<JSONObject> jsonObjects) throws Exception {
         String content = String.format("data-platform数据统计报表表已发送至您的邮箱\n本次统计结果共有%d条\n详情请查看邮件~", jsonObjects.size());
         // 发送钉钉
-        restClient.sendDingTalk(content);
+        mailRest.sendDingTalk(content);
     }
 
 

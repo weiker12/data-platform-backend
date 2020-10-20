@@ -1,10 +1,14 @@
 package com.peilian.dataplatform.controller;
 
+import com.peilian.dataplatform.common.Auth;
+import com.peilian.dataplatform.common.AuthEnum;
 import com.peilian.dataplatform.config.BizException;
 import com.peilian.dataplatform.config.ResponseMessage;
 import com.peilian.dataplatform.config.Result;
+import com.peilian.dataplatform.dto.ApiInfoListDto;
 import com.peilian.dataplatform.dto.ApiSourceDto;
 import com.peilian.dataplatform.dto.DataSourceDto;
+import com.peilian.dataplatform.dto.DataSourceListDto;
 import com.peilian.dataplatform.entity.ApiSource;
 import com.peilian.dataplatform.entity.DataFlow;
 import com.peilian.dataplatform.entity.DataSource;
@@ -15,12 +19,11 @@ import com.peilian.dataplatform.enums.StatusType;
 import com.peilian.dataplatform.service.ApiConfigService;
 import com.peilian.dataplatform.util.CommonValidator;
 import com.peilian.dataplatform.util.SqlUtils;
+import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.web.PageableDefault;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -35,7 +38,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @RestController
-@RequestMapping("/v1/data-paltform")
+@RequestMapping("/v1")
 public class ApiConfigController {
 
     @Autowired
@@ -48,29 +51,30 @@ public class ApiConfigController {
      * 获取数据源列表(支持分页查询)
      * 查询条件dsCode为模糊查询
      *
-     * @param dsCode
+     * @param dataSourceListDto
      * @return
      */
-    @GetMapping("/getDataSourceList")
-    public ResponseMessage getDataSourceList(@RequestParam(value = "dsCode", required = false) String dsCode,
-                                             @PageableDefault Pageable pageable) {
-        log.info("入参dsCode={}, pageable={}", dsCode, pageable);
-        Page<DataSource> apiSourcePage = apiConfigService.getDataSourceList(dsCode, pageable);
+    @ApiOperation(value = "获取数据源列表(支持分页查询)")
+    @PostMapping("/getDataSourceList")
+    @Auth(value = AuthEnum.APP_ALL)
+    public ResponseMessage getDataSourceList(@RequestBody DataSourceListDto dataSourceListDto) {
+        log.info("入参dataSourceListDto={}", dataSourceListDto);
+        Page<DataSource> apiSourcePage = apiConfigService.getDataSourceList(dataSourceListDto);
         return Result.success(apiSourcePage);
     }
 
     /**
-     * 获取数据报表接口列表数据
+     * 获取接口配置信息列表数据
      *
-     * @param apiCode
+     * @param apiInfoListDto
      * @return=
      */
-    @GetMapping("/getApiInfoList")
-    public ResponseMessage getApiInfoList(@RequestParam(value = "apiCode", required = false) String apiCode,
-                                          @RequestParam(value = "apiName", required = false) String apiName,
-                                          @PageableDefault Pageable pageable) {
-        log.info("入参apiCode={}, apiName={}, pageable={}", apiCode, apiName, pageable);
-        Page<ApiSource> apiSourcePage = apiConfigService.getApiInfoList(apiCode, apiName, pageable);
+    @ApiOperation(value = "获取接口配置信息列表数据")
+    @PostMapping("/getApiInfoList")
+    @Auth(value = AuthEnum.APP_ALL)
+    public ResponseMessage getApiInfoList(@RequestBody ApiInfoListDto apiInfoListDto) {
+        log.info("入参apiInfoListDto={}", apiInfoListDto);
+        Page<ApiSource> apiSourcePage = apiConfigService.getApiInfoList(apiInfoListDto);
         return Result.success(apiSourcePage);
     }
 
@@ -80,7 +84,9 @@ public class ApiConfigController {
      * @param id
      * @return
      */
+    @ApiOperation(value = "获取数据源详情信息")
     @GetMapping("/getDataSource")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage getDataSource(@RequestParam("id") Long id) {
         log.info("入参id={}", id);
         DataSource dataSource = apiConfigService.getDataSource(id);
@@ -93,7 +99,9 @@ public class ApiConfigController {
      * @param apiCode
      * @return
      */
+    @ApiOperation(value = "获取数据报表的详情信息")
     @GetMapping("/getApiInfo")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage getApiInfo(@RequestParam("apiCode") String apiCode) throws Exception {
         log.info("入参apiCode={}", apiCode);
         ApiSourceDto apiSourceDto = apiConfigService.getApiInfo(apiCode);
@@ -106,7 +114,9 @@ public class ApiConfigController {
      * @param dataSourceDto
      * @return
      */
+    @ApiOperation(value = "新增或者更新数据源信息")
     @PostMapping("/saveDataSource")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage saveDataSource(@RequestBody DataSourceDto dataSourceDto) throws BizException {
         log.info("入参dataSourceDto={}", dataSourceDto);
         commonValidator.checkDto(dataSourceDto);
@@ -115,12 +125,14 @@ public class ApiConfigController {
     }
 
     /**
-     * 新增或者更新数据报表接口信息
+     * 新增或者更新数据报表接口配置信息
      *
      * @param apiSourceDto
      * @return
      */
+    @ApiOperation(value = "新增或者更新数据报表接口配置信息")
     @PostMapping("/saveApiInfo")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage saveApiInfo(@RequestBody ApiSourceDto apiSourceDto) throws BizException {
         log.info("入参apiCode={}, paramsJson={}", apiSourceDto);
         commonValidator.checkDto(apiSourceDto);
@@ -143,7 +155,9 @@ public class ApiConfigController {
      * @param id
      * @return
      */
+    @ApiOperation(value = "删除数据源配置信息")
     @PostMapping("/delDataSource")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage delDataSource(@RequestParam("id") Long id) {
         log.info("入参id={}", id);
         apiConfigService.delDataSource(id);
@@ -156,12 +170,15 @@ public class ApiConfigController {
      * @param apiCode
      * @return
      */
+    @ApiOperation(value = "删除数据报表信息")
     @PostMapping("/delApiInfo")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage delApiInfo(@RequestParam("apiCode") String apiCode) {
         log.info("入参apiCode={}, paramsJson={}", apiCode);
         apiConfigService.delApiInfo(apiCode);
         return Result.success();
     }
+
 
     /**
      * 获取该接口配置清单的字典项
@@ -169,7 +186,9 @@ public class ApiConfigController {
      * @param apiCode
      * @return
      */
+    @ApiOperation(value = "获取该接口配置清单的字典项")
     @GetMapping("/getDict")
+    @Auth(value = AuthEnum.APP_ALL)
     public ResponseMessage getDict(@RequestParam(value = "apiCode") String apiCode) throws Exception {
         log.info("入参dsCode={}", apiCode);
         Map<String, Object> dictMap = new HashMap<>(16);

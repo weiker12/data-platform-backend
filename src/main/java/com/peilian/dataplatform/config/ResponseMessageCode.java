@@ -3,7 +3,7 @@ package com.peilian.dataplatform.config;
 /**
  * @author zhengshangchao
  */
-public enum ResponseMessageCodeEnum {
+public enum ResponseMessageCode {
 
     /** 200请求成功 */
     OK("200"),
@@ -32,7 +32,7 @@ public enum ResponseMessageCodeEnum {
 
     private String code;
 
-    ResponseMessageCodeEnum(String code) {
+    ResponseMessageCode(String code) {
         this.code = code;
     }
 

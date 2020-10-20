@@ -20,9 +20,9 @@ public class GlobleExceptionHandler {
         if(ex instanceof BizException) {
             BizException bizException = (BizException) ex;
             String errorMsg = bizException.getMessage();
-            return Result.error(ResponseMessageCodeEnum.INTERNAL_SERVER_ERROR.getCode(), errorMsg);
+            return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), errorMsg);
         } else {
-            return Result.error(ResponseMessageCodeEnum.INTERNAL_SERVER_ERROR.getCode(), ex.toString());
+            return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), ex.toString());
         }
     }
 }

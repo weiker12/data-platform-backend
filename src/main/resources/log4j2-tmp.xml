@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="ms.name">ai-app-api</Property>
+        <Property name="ms.version">1.0.0</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <!--颜色模式-->
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="FILE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="FILE_LOG_TraceId">[%X{traceId}][%t:%r] %d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss,SSS}:%4p (%c{1}:%L) - %m%n" />
+            <!--<PatternLayout pattern="(From:%X{Src} UserType:%X{UserType} UserId:%X{UserId}) %d{yyyy-MM-dd HH:mm:ss,SSS}:%4p (%c{1}:%L) - %m%n" />-->
+        </Console>
+
+        <RollingFile name="FileInfo" fileName="logs/info.log"
+                     filePattern="logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+            <!--XML5个转义符:<，>，&，”，©;的转义字符分别如下： &lt; &gt;&amp; &quot; &apos;-->
+            <PatternLayout
+                    pattern="{&quot;apiName&quot;:&quot;${ms.name}&quot;,&quot;apiVer&quot;:&quot;${ms.version}&quot;,&quot;host&quot;:&quot;${hostName}&quot;,&quot;date&quot;:&quot;%d{yyyy-MM-dd HH:mm:ss,SSS}&quot;,&quot;level&quot;:&quot;%p&quot;,&quot;logger&quot;:&quot;%c{1}:%L&quot;,&quot;message&quot;:&quot;%enc{%m}&quot;,&quot;thread&quot;:&quot;%t&quot;}%n"
+            />
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+    </Appenders>
+    <Loggers>
+
+        <logger name="io.undertow" level="error"/>
+        <logger name="org.springframework" level="warn"/>
+        <logger name="com.peilian.aiapp.MainApplication" level="warn"/>
+        <Logger name="org.apache.kafka.common" level="ERROR" />
+        <logger name="com.peilian" level="debug" additivity="false">
+            <AppenderRef ref="Console" />
+            <!--<AppenderRef ref="FileInfo" />-->
+        </logger>
+        <Root level="info">
+            <AppenderRef ref="Console" />
+            <!--<AppenderRef ref="FileInfo" />-->
+        </Root>
+    </Loggers>
+</Configuration>

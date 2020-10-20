@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN">
+    <Properties>
+        <Property name="ms.name">@msName@-dev</Property>
+        <Property name="ms.version">@msVersion@</Property>
+        <Property name="LOG_EXCEPTION_CONVERSION_WORD">%xwEx</Property>
+        <Property name="LOG_LEVEL_PATTERN">%5p</Property>
+        <!--颜色模式-->
+        <Property name="CONSOLE_LOG_PATTERN">%clr{%d{yyyy-MM-dd HH:mm:ss.SSS}}{faint} %clr{${LOG_LEVEL_PATTERN}} %clr{${sys:PID}}{magenta} %clr{---}{faint} %clr{[%15.15t]}{faint} %clr{%-40.40c{1.}}{cyan} %clr{:}{faint} %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+        <Property name="FILE_LOG_PATTERN">%d{yyyy-MM-dd HH:mm:ss.SSS} ${LOG_LEVEL_PATTERN} ${sys:PID} --- [%t] %-40.40c{1.} : %m%n${sys:LOG_EXCEPTION_CONVERSION_WORD}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT" follow="true">
+            <PatternLayout pattern="${sys:CONSOLE_LOG_PATTERN}" />
+        </Console>
+        <RollingFile name="FileInfo" fileName="logs/info.log"
+                     filePattern="${sys:user.home}/logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout pattern="%4p (From:%X{Src} UserId:%X{UserId})[${ms.version}] %d{yyyy-MM-dd HH:mm:ss,SSS} (%c{1}:%L): %m%n" />
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+        <RollingFile name="JsonInfo" fileName="${sys:user.home}/logs/info.log"
+                     filePattern="${sys:user.home}/logs/$${date:yyyy-MM}/info-%d{yyyy-MM-dd}-%i.log">
+            <!--XML5个转义符:<，>，&，”，©;的转义字符分别如下： &lt; &gt;&amp; &quot; &apos;-->
+            <ThresholdFilter level="debug" onMatch="ACCEPT" onMismatch="DENY"/>
+            <PatternLayout
+                    pattern="{&quot;apiName&quot;:&quot;${ms.name}&quot;,&quot;apiVer&quot;:&quot;${ms.version}&quot;,&quot;host&quot;:&quot;${hostName}&quot;,&quot;date&quot;:&quot;%d{yyyy-MM-dd HH:mm:ss,SSS}&quot;,&quot;level&quot;:&quot;%p&quot;,&quot;logger&quot;:&quot;%c{1}:%L&quot;,&quot;message&quot;:&quot;%enc{%m}&quot;,&quot;thread&quot;:&quot;%t&quot;}%n"
+            />
+            <Policies>
+                <TimeBasedTriggeringPolicy/>
+                <SizeBasedTriggeringPolicy size="100 MB"/>
+            </Policies>
+        </RollingFile>
+        <Console name="JsonConsole" target="SYSTEM_OUT" follow="true">
+            <JsonLayout complete="false" compact="true" eventEol="true">
+                <KeyValuePair key="SvName" value="${ms.name}"/>
+                <KeyValuePair key="SvVer" value="${ms.version}"/>
+                <KeyValuePair key="Src" value="$${ctx:Src}"/>
+                <KeyValuePair key="UserId" value="$${ctx:UserId}"/>
+                <KeyValuePair key="Ip" value="$${ctx:Ip}"/>
+                <KeyValuePair key="LogId" value="$${ctx:LogId}"/>
+            </JsonLayout>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Logger name="org.hibernate.validator.internal.util.Version" level="warn" />
+        <logger name="io.undertow" level="error"/>
+        <logger name="com.netflix.discovery" level="warn"/>
+        <logger name="com.netflix.config" level="error"/>
+        <logger name="org.springframework" level="warn"/>
+        <Logger name="org.apache.kafka" level="warn" />
+        <logger name="com.peilian" level="debug" additivity="false">
+            <appender-ref ref="FileInfo" />
+            <appender-ref ref="JsonConsole" />
+        </logger>
+        <Root level="info">
+            <appender-ref ref="FileInfo" />
+            <appender-ref ref="JsonConsole" />
+        </Root>
+    </Loggers>
+</Configuration>

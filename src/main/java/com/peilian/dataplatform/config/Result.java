@@ -5,14 +5,14 @@ package com.peilian.dataplatform.config;
  */
 public class Result {
 
-    private static final ResponseMessage RESPONSE_MESSAGE_SUCCESS = new ResponseMessage(ResponseMessageCodeEnum.OK.getCode(), "");
+    private static final ResponseMessage RESPONSE_MESSAGE_SUCCESS = new ResponseMessage(ResponseMessageCode.OK.getCode(), "");
 
     public static ResponseMessage success() {
         return RESPONSE_MESSAGE_SUCCESS;
     }
 
     public static <T> ResponseMessage<T> success(T t) {
-        return new ResponseMessage(ResponseMessageCodeEnum.OK.getCode(), "查询成功", t);
+        return new ResponseMessage(ResponseMessageCode.OK.getCode(), "查询成功", t);
     }
 
     public static ResponseMessage error() {
@@ -20,7 +20,7 @@ public class Result {
     }
 
     public static ResponseMessage error(String message) {
-        return error(ResponseMessageCodeEnum.INTERNAL_SERVER_ERROR.getCode(), message);
+        return error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), message);
     }
 
     public static ResponseMessage error(String code, String message) {

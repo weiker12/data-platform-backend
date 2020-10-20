@@ -1,5 +1,6 @@
 package com.peilian.dataplatform.service;
 
+import com.peilian.dataplatform.dto.DataDto;
 import com.peilian.dataplatform.enums.ResultType;
 import net.sf.json.JSONObject;
 
@@ -14,23 +15,21 @@ public interface ApiService {
      * 通过apiCode查询接口数据
      * 返回类型array
      *
-     * @param apiCode
-     * @param paramsJson
+     * @param dataDto
      * @throws Exception
      * @return
      */
-    List<JSONObject> queryList(String apiCode, String paramsJson) throws Exception;
+    List<JSONObject> queryList(DataDto dataDto) throws Exception;
 
     /**
      * 通过apiCode查询接口数据
      * 返回类型object
      *
-     * @param apiCode
-     * @param paramsJson
+     * @param dataDto
      * @throws Exception
      * @return
      */
-    JSONObject query(String apiCode, String paramsJson) throws Exception;
+    JSONObject query(DataDto dataDto) throws Exception;
 
     /**
      * 通过apiCode获取返回类型

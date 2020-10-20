@@ -20,7 +20,7 @@ import java.util.Arrays;
  */
 @Slf4j
 @Component
-public class RestClient {
+public class MailRest {
 
     @Value("${mail.api.url}")
     private String mailUrl;
@@ -111,6 +111,36 @@ public class RestClient {
         at.setIsAtAll(false);
         OapiRobotSendResponse response = client.execute(request);
         log.info("钉钉报警消息返回：{}", response);
+    }
+
+    /**
+     * 获取邮件模板
+     *
+     * @return
+     */
+    public String getHtmlContent() {
+        return "<html>\n" +
+                "<head>\n" +
+                "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf8\" />\n" +
+                "<style type=\"text/css\">\n" +
+                "TABLE {\n" +
+                "    BORDER-COLLAPSE: collapse;TEXT-ALIGN: center; WIDTH:80%; margin: 0 auto;\n" +
+                "}\n" +
+                "TR {\n" +
+                "    BACKGROUND-COLOR:#000099; TEXT-ALIGN: left; FONT-SIZE: 14px; TEXT-WEIGHT:bold; COLOR:#FFFFFF; BORDER:1px #888 solid; \n" +
+                "}\n" +
+                "TH {\n" +
+                "    FONT-SIZE: 12px; FONT-FAMILY: Verdana, Arial; BORDER:1px #ccc solid; TEXT-ALIGN: center\n" +
+                "}\n" +
+                "TD {\n" +
+                "    FONT-SIZE: 12px; BORDER:1px #999999 solid; BACKGROUND-COLOR: #e5ecf9; TEXT-ALIGN: center; COLOR:black;\n" +
+                "}\n" +
+                "</style>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "#content\n" +
+                "</body>\n" +
+                "</html>\n";
     }
 
 }

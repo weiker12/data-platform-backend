@@ -1,8 +1,10 @@
 package com.peilian.dataplatform.service.impl;
 
 import com.peilian.dataplatform.config.BizException;
+import com.peilian.dataplatform.dto.ApiInfoListDto;
 import com.peilian.dataplatform.dto.ApiSourceDto;
 import com.peilian.dataplatform.dto.DataSourceDto;
+import com.peilian.dataplatform.dto.DataSourceListDto;
 import com.peilian.dataplatform.entity.ApiSource;
 import com.peilian.dataplatform.entity.DataConvert;
 import com.peilian.dataplatform.entity.DataFlow;
@@ -17,7 +19,6 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +28,7 @@ import org.springframework.util.CollectionUtils;
 import javax.persistence.criteria.Predicate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -55,18 +57,17 @@ public class ApiConfigServiceImpl implements ApiConfigService {
      * 根据查询条件apiCode和apiName返回接口信息
      * 其中dsCode是模糊查询
      *
-     * @param dsCode
-     * @param pageable
+     * @param dataSourceListDto
      * @return
      */
     @Override
-    public Page<DataSource> getDataSourceList(final String dsCode, Pageable pageable) {
-        log.info("入参dsCode={}", dsCode);
+    public Page<DataSource> getDataSourceList(DataSourceListDto dataSourceListDto) {
+        log.info("dataSourceListDto={}", dataSourceListDto);
         Specification<DataSource> specification = (Specification<DataSource>) (root, query, cb) -> {
             // 添加查询条件，apiCode为精确查询apiName为模糊查询
             List<Predicate> predicates = new ArrayList<>();
-            if(StringUtils.isNotBlank(dsCode)) {
-                predicates.add(cb.like(root.get("dsCode").as(String.class), "%" + dsCode + "%"));
+            if(StringUtils.isNotBlank(dataSourceListDto.getDsCode())) {
+                predicates.add(cb.like(root.get("dsCode").as(String.class), "%" + dataSourceListDto.getDsCode() + "%"));
             }
             // 创建一个查询条件的集合，长度为满足上述两个条件的个数
             Predicate[] pre = new Predicate[predicates.size()];
@@ -75,7 +76,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
             // 将上面拼接好的条件返回
             return query.where(predicates.toArray(pre)).getRestriction();
         };
-        Page<DataSource> page = dataSourceRepository.findAll(specification, pageable);
+        Page<DataSource> page = dataSourceRepository.findAll(specification, dataSourceListDto);
         List<DataSource> dataSources = page.getContent();
         // 数据库密码脱敏处理
         dataSources.stream().forEach(dataSource -> {
@@ -100,22 +101,20 @@ public class ApiConfigServiceImpl implements ApiConfigService {
      * 根据查询条件apiCode和apiName返回接口信息
      * 其中apiCode是精确查询，apiName是模糊查询
      *
-     * @param apiCode
-     * @param apiName
-     * @param pageable
+     * @param apiInfoListDto
      * @return
      */
     @Override
-    public Page<ApiSource> getApiInfoList(String apiCode, String apiName, Pageable pageable) {
-        log.info("入参apiCode={}, apiName={}", apiCode, apiName);
+    public Page<ApiSource> getApiInfoList(ApiInfoListDto apiInfoListDto) {
+        log.info("入参apiInfoListDto={}", apiInfoListDto);
         Specification<ApiSource> specification = (Specification<ApiSource>) (root, query, cb) -> {
             // 添加查询条件，apiCode为精确查询apiName为模糊查询
             List<Predicate> predicates = new ArrayList<>();
-            if(StringUtils.isNotBlank(apiCode)) {
-                predicates.add(cb.equal(root.get("apiCode").as(String.class), apiCode));
+            if(StringUtils.isNotBlank(apiInfoListDto.getApiCode())) {
+                predicates.add(cb.equal(root.get("apiCode").as(String.class), apiInfoListDto.getApiCode()));
             }
-            if(StringUtils.isNotBlank(apiName)) {
-                predicates.add(cb.like(root.get("apiName").as(String.class), "%" + apiName + "%"));
+            if(StringUtils.isNotBlank(apiInfoListDto.getApiName())) {
+                predicates.add(cb.like(root.get("apiName").as(String.class), "%" + apiInfoListDto.getApiName() + "%"));
             }
             // 创建一个查询条件的集合，长度为满足上述两个条件的个数
             Predicate[] pre = new Predicate[predicates.size()];
@@ -124,7 +123,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
             // 将上面拼接好的条件返回
             return query.where(predicates.toArray(pre)).getRestriction();
         };
-        Page<ApiSource> page = apiSourceRepository.findAll(specification, pageable);
+        Page<ApiSource> page = apiSourceRepository.findAll(specification, apiInfoListDto);
         log.info("查询结果返回apiSourceList={}", page);
         return page;
     }
@@ -191,8 +190,14 @@ public class ApiConfigServiceImpl implements ApiConfigService {
             BeanUtils.copyProperties(dataSourceDto, ds);
             dataSourceRepository.save(ds);
         } else {
+            String oldPassword = dataSource.getPassword();
+            String password = dataSourceDto.getPassword();
+            if(StringUtils.isNotBlank(password) && password.contains("*")) {
+                password = oldPassword;
+            }
             DataSource dataSource1 = dataSourceRepository.findById(id).get();
             BeanUtils.copyProperties(dataSourceDto, dataSource1);
+            dataSource1.setPassword(password);
             dataSourceRepository.save(dataSource1);
         }
     }
@@ -248,7 +253,10 @@ public class ApiConfigServiceImpl implements ApiConfigService {
     @Override
     public void delDataSource(Long id) {
         log.info("入参id={}", id);
-        dataSourceRepository.deleteById(id);
+        Optional<DataSource> dataSourceOptional = dataSourceRepository.findById(id);
+        if(dataSourceOptional.isPresent()) {
+            dataSourceRepository.deleteById(id);
+        }
     }
 
     /**
@@ -260,9 +268,18 @@ public class ApiConfigServiceImpl implements ApiConfigService {
     @Override
     public void delApiInfo(String apiCode) {
         log.info("入参apiCode={}", apiCode);
-        apiSourceRepository.deleteByApiCode(apiCode);
-        dataFlowRepository.deleteByApiCode(apiCode);
-        dataConvertRepository.deleteByApiCode(apiCode);
+        ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
+        if(!Objects.isNull(apiSource)) {
+            apiSourceRepository.deleteByApiCode(apiCode);
+        }
+        List<DataFlow> dataFlows = dataFlowRepository.findByApiCode(apiCode);
+        if(!CollectionUtils.isEmpty(dataFlows)) {
+            dataFlowRepository.deleteByApiCode(apiCode);
+        }
+        List<DataConvert> dataConverts = dataConvertRepository.findByApiCode(apiCode);
+        if(!CollectionUtils.isEmpty(dataConverts)) {
+            dataConvertRepository.deleteByApiCode(apiCode);
+        }
     }
 
 }
