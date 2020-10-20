@@ -5,7 +5,6 @@ import com.peilian.dataplatform.config.UnauthorizedException;
 import com.peilian.dataplatform.enums.CodeMsg;
 import com.peilian.dataplatform.util.MyJwt;
 import lombok.extern.log4j.Log4j2;
-import org.apache.logging.log4j.ThreadContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -53,13 +52,13 @@ public class IneffectiveJsonWebTokenHandler implements TokenHandler {
                 byte[] keyBytes = Base64.getDecoder().decode(jwtkey);
                 MyJwt myJwt = JwtHelper.parseMyJwt(jwt, keyBytes);
                 String cellphone = myJwt.getCellphone();
-                if(myJwt != null && myJwt.getStatus() == -2) {
+                if (myJwt != null && myJwt.getStatus() == -2) {
                     log.error("服务内部错误,jwt解释错误");
-                    throw new UnauthorizedException(CodeMsg.CODE_1004.getMsg());
+                    throw new UnauthorizedException(CodeMsg.LOGIN_TIMEOUT.getMsg());
                 }
                 if (myJwt == null || !whiteList.contains(cellphone)) {
                     log.error("服务内部错误,jwt解释错误");
-                    throw new UnauthorizedException(CodeMsg.ROLE_ERROR.getMsg());
+                    throw new UnauthorizedException(CodeMsg.LOGIN_ERROR.getMsg());
                 }
                 visitor.setCellphone(myJwt.getCellphone());
                 httpRequest.setAttribute(GlobalVar.CELLPHONE, myJwt.getCellphone());

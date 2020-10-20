@@ -53,6 +53,8 @@ public class ApiConfigServiceImpl implements ApiConfigService {
     @Autowired
     DataConvertRepository dataConvertRepository;
 
+    private final static String ASTERISK = "*";
+
     /**
      * 根据查询条件apiCode和apiName返回接口信息
      * 其中dsCode是模糊查询
@@ -66,7 +68,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         Specification<DataSource> specification = (Specification<DataSource>) (root, query, cb) -> {
             // 添加查询条件，apiCode为精确查询apiName为模糊查询
             List<Predicate> predicates = new ArrayList<>();
-            if(StringUtils.isNotBlank(dataSourceListDto.getDsCode())) {
+            if (StringUtils.isNotBlank(dataSourceListDto.getDsCode())) {
                 predicates.add(cb.like(root.get("dsCode").as(String.class), "%" + dataSourceListDto.getDsCode() + "%"));
             }
             // 创建一个查询条件的集合，长度为满足上述两个条件的个数
@@ -80,7 +82,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         List<DataSource> dataSources = page.getContent();
         // 数据库密码脱敏处理
         dataSources.stream().forEach(dataSource -> {
-            dataSource.setPassword(dataSource.getPassword().replaceAll("\\w", "*"));
+            dataSource.setPassword(dataSource.getPassword().replaceAll("\\w", ASTERISK));
         });
         log.info("查询结果返回dataSourceList={}", page);
         return page;
@@ -110,10 +112,10 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         Specification<ApiSource> specification = (Specification<ApiSource>) (root, query, cb) -> {
             // 添加查询条件，apiCode为精确查询apiName为模糊查询
             List<Predicate> predicates = new ArrayList<>();
-            if(StringUtils.isNotBlank(apiInfoListDto.getApiCode())) {
+            if (StringUtils.isNotBlank(apiInfoListDto.getApiCode())) {
                 predicates.add(cb.equal(root.get("apiCode").as(String.class), apiInfoListDto.getApiCode()));
             }
-            if(StringUtils.isNotBlank(apiInfoListDto.getApiName())) {
+            if (StringUtils.isNotBlank(apiInfoListDto.getApiName())) {
                 predicates.add(cb.like(root.get("apiName").as(String.class), "%" + apiInfoListDto.getApiName() + "%"));
             }
             // 创建一个查询条件的集合，长度为满足上述两个条件的个数
@@ -140,7 +142,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         Optional<DataSource> dataSource = dataSourceRepository.findById(id);
         DataSource dataSource1 = dataSource.get();
         // 数据库密码脱敏处理
-        dataSource1.setPassword(dataSource1.getPassword().replaceAll("\\w", "*"));
+        dataSource1.setPassword(dataSource1.getPassword().replaceAll("\\w", ASTERISK));
         return dataSource1;
     }
 
@@ -170,8 +172,8 @@ public class ApiConfigServiceImpl implements ApiConfigService {
      * 新增或者更新数据源配置信息
      *
      * @param dataSourceDto
-     * @throws BizException
      * @return
+     * @throws BizException
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -181,10 +183,10 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         String dsCode = dataSourceDto.getDsCode();
         DataSource dataSource = dataSourceRepository.findByDsCode(dsCode);
         // 校验dsCode命名是否有冲突
-        if(dataSource != null && !dataSource.getId().equals(id)) {
+        if (dataSource != null && !dataSource.getId().equals(id)) {
             throw new BizException("dsCode在数据源配置中已存在！");
         }
-        if(null == id) {
+        if (null == id) {
             // 新增数据源信息
             DataSource ds = new DataSource();
             BeanUtils.copyProperties(dataSourceDto, ds);
@@ -192,7 +194,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         } else {
             String oldPassword = dataSource.getPassword();
             String password = dataSourceDto.getPassword();
-            if(StringUtils.isNotBlank(password) && password.contains("*")) {
+            if (StringUtils.isNotBlank(password) && password.contains(ASTERISK)) {
                 password = oldPassword;
             }
             DataSource dataSource1 = dataSourceRepository.findById(id).get();
@@ -206,8 +208,8 @@ public class ApiConfigServiceImpl implements ApiConfigService {
      * 新增或者更新接口配置信息
      *
      * @param apiSourceDto
-     * @throws BizException
      * @return
+     * @throws BizException
      */
     @Transactional(rollbackFor = Exception.class)
     @Override
@@ -216,10 +218,10 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         Long id = apiSourceDto.getId();
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
         // 校验apiCode是否重复
-        if(apiSource != null && !apiSource.getId().equals(id)) {
+        if (apiSource != null && !apiSource.getId().equals(id)) {
             throw new BizException("apiCode在数据源配置中已存在");
         }
-        if(null == id) {
+        if (null == id) {
             // 新增接口配置信息
             apiSource = new ApiSource();
             BeanUtils.copyProperties(apiSourceDto, apiSource);
@@ -232,14 +234,14 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         // 保存dataFlow信息
         List<DataFlow> dataFlows = apiSourceDto.getDataFlowList();
         dataFlowRepository.deleteByApiCode(apiCode);
-        if(!CollectionUtils.isEmpty(dataFlows)) {
+        if (!CollectionUtils.isEmpty(dataFlows)) {
             dataFlows.stream().forEach(dataFlow -> dataFlow.setApiCode(apiCode));
             dataFlowRepository.saveAll(dataFlows);
         }
         // 保存dataConvert信息
         List<DataConvert> dataConverts = apiSourceDto.getDataConvertList();
         dataConvertRepository.deleteByApiCode(apiCode);
-        if(!CollectionUtils.isEmpty(dataConverts)) {
+        if (!CollectionUtils.isEmpty(dataConverts)) {
             dataConverts.stream().forEach(dataConvert -> dataConvert.setApiCode(apiCode));
             dataConvertRepository.saveAll(dataConverts);
         }
@@ -254,7 +256,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
     public void delDataSource(Long id) {
         log.info("入参id={}", id);
         Optional<DataSource> dataSourceOptional = dataSourceRepository.findById(id);
-        if(dataSourceOptional.isPresent()) {
+        if (dataSourceOptional.isPresent()) {
             dataSourceRepository.deleteById(id);
         }
     }
@@ -269,15 +271,15 @@ public class ApiConfigServiceImpl implements ApiConfigService {
     public void delApiInfo(String apiCode) {
         log.info("入参apiCode={}", apiCode);
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
-        if(!Objects.isNull(apiSource)) {
+        if (!Objects.isNull(apiSource)) {
             apiSourceRepository.deleteByApiCode(apiCode);
         }
         List<DataFlow> dataFlows = dataFlowRepository.findByApiCode(apiCode);
-        if(!CollectionUtils.isEmpty(dataFlows)) {
+        if (!CollectionUtils.isEmpty(dataFlows)) {
             dataFlowRepository.deleteByApiCode(apiCode);
         }
         List<DataConvert> dataConverts = dataConvertRepository.findByApiCode(apiCode);
-        if(!CollectionUtils.isEmpty(dataConverts)) {
+        if (!CollectionUtils.isEmpty(dataConverts)) {
             dataConvertRepository.deleteByApiCode(apiCode);
         }
     }

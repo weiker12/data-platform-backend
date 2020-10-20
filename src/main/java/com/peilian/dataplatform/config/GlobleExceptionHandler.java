@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 /**
  * 全局统一异常捕捉
+ *
  * @author zhengshangchao
  */
 @Component
@@ -17,7 +18,7 @@ public class GlobleExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseMessage defaultExceptionHandler(Exception ex) {
         ex.printStackTrace();
-        if(ex instanceof BizException) {
+        if (ex instanceof BizException) {
             BizException bizException = (BizException) ex;
             String errorMsg = bizException.getMessage();
             return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), errorMsg);

@@ -16,11 +16,11 @@ public class WebConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(AuthorizationInterceptor()).addPathPatterns("/v1/**");
+        registry.addInterceptor(authInterceptor()).addPathPatterns("/v1/**");
     }
 
     @Bean
-    public AuthorizationInterceptor AuthorizationInterceptor() {
+    public AuthorizationInterceptor authInterceptor() {
         return new AuthorizationInterceptor();
     }
 

@@ -1,8 +1,8 @@
 package com.peilian.dataplatform.config;
 
 /**
- * @author zhengshangchao
  * @param <T>
+ * @author zhengshangchao
  */
 public class ResponseMessage<T> {
 

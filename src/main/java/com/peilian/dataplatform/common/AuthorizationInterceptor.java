@@ -20,6 +20,7 @@ import java.util.Base64;
 /**
  * 接口鉴权拦截器
  * 兼容老逻辑，客户端不传uid(第三方回调接口), NO_LOGIN 注解需要配合执行
+ *
  * @author hui.wang
  * @date 2020/5/9
  * @since 1.0.0
@@ -28,15 +29,14 @@ import java.util.Base64;
 @Component
 public class AuthorizationInterceptor implements HandlerInterceptor {
 
+    @Autowired
+    TokenHandler tokenHandler;
     @Value("${jwt.enable:true}")
     private boolean jwtEnable;
-
     @Value("${jwt.key}")
     private String jwtkey;
 
-    @Autowired
-    TokenHandler tokenHandler;
-
+    private final static String OPTIONS = "OPTIONS";
 
     /**
      * 5种权限
@@ -46,13 +46,13 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
      */
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws UnauthorizedException {
-        if(!handler.getClass().isAssignableFrom(HandlerMethod.class)){
+        if (!handler.getClass().isAssignableFrom(HandlerMethod.class)) {
             return true;
         }
         String url = request.getRequestURI();
         String method = request.getMethod();
         // 预请求 埋点 第三方回调等相关的接口直接放行
-        if (FilterConstant.isSpecialAPI(url) || "OPTIONS".equalsIgnoreCase(method) || FilterConstant.isSwaggerUrl(url)) {
+        if (FilterConstant.isSpecialApi(url) || OPTIONS.equalsIgnoreCase(method) || FilterConstant.isSwaggerUrl(url)) {
             return true;
         }
         // 解析Auth注解
@@ -63,10 +63,10 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
         AuthEnum methodAuth = authAnnotation == null ? AuthEnum.APP_ALL : authAnnotation.value();
 
         //声明NO_LOGIN接口直接放行
-        if(AuthEnum.NO_LOGIN.equals(methodAuth)){
-            if(jwtEnable) {
+        if (AuthEnum.NO_LOGIN.equals(methodAuth)) {
+            if (jwtEnable) {
                 String jwt = visitor.getJwtToken();
-                if(StringUtils.isNotBlank(jwt)) {
+                if (StringUtils.isNotBlank(jwt)) {
                     byte[] keyBytes = Base64.getDecoder().decode(jwtkey);
                     MyJwt myJwt = JwtHelper.parseMyJwt(jwt, keyBytes);
                     if (myJwt != null) {
@@ -85,13 +85,14 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
     /**
      * 访问API需要的权限，默认为需要登陆
+     *
      * @param m
      * @return
      */
-    private Auth getMethodAuth(Method m){
+    private Auth getMethodAuth(Method m) {
         Auth authAnnotation = m.getAnnotation(Auth.class);
-        if(authAnnotation == null){
-            authAnnotation =  m.getDeclaringClass().getAnnotation(Auth.class);
+        if (authAnnotation == null) {
+            authAnnotation = m.getDeclaringClass().getAnnotation(Auth.class);
         }
         return authAnnotation == null ? null : authAnnotation;
     }

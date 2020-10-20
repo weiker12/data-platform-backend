@@ -27,7 +27,7 @@ public class JwtHelper {
     }
 
 
-    private static Claims parseJWT(String jsonWebToken, byte[] keybytes) {
+    private static Claims parseJwt(String jsonWebToken, byte[] keybytes) {
         // log.info("parseJWT开始 参数jsonWebToken:{},keybytes:{}",jsonWebToken,keybytes);
         Claims claims = null;
         //status = -1;//异常类型 0正常 -1非法 -2已过期 -3jwt密钥非法 -4 未知异常
@@ -57,7 +57,7 @@ public class JwtHelper {
         return genStatusClaims(-4);
     }
 
-    private static Claims parseJWT(String jsonWebToken, String base64Security) {
+    private static Claims parseJwt(String jsonWebToken, String base64Security) {
         try {
             return Jwts.parser()
                     .setSigningKey(DatatypeConverter.parseBase64Binary(base64Security))
@@ -69,8 +69,8 @@ public class JwtHelper {
     }
 
     public static MyJwt parseMyJwt(String jsonWebToken, byte[] keybytes) {
-        Claims claims = parseJWT(jsonWebToken, keybytes);
-        log.info("parseMyJwt claims:{}",claims);
+        Claims claims = parseJwt(jsonWebToken, keybytes);
+        log.info("parseMyJwt claims:{}", claims);
         MyJwt myJwt = new MyJwt();
         if (claims == null) {
             myJwt.setStatusMsg("未知异常");
@@ -201,7 +201,7 @@ public class JwtHelper {
         if (auth == null || auth.length() < 32) {
             return null;
         }
-        if (!auth.substring(0, 6).equalsIgnoreCase("Bearer")) {
+        if (!"Bearer".equalsIgnoreCase(auth.substring(0, 6))) {
             return null;
         }
         return auth.substring(7, auth.length());

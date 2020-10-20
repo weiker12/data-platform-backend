@@ -30,7 +30,7 @@ public class ContextFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        try{
+        try {
             //清空当前线程副本
             UserThreadContext.requestStart();
 
@@ -52,8 +52,8 @@ public class ContextFilter extends OncePerRequestFilter {
             boolean isInnerRequest = urlStatus > 0 || isInnerIp;
             UserVisitor visitor = getRequestInfo(request);
             UserThreadContext.setUserVisitor(visitor);
-            UserThreadContext.setAttribute(UserThreadContext.REQUEST_WORK_REQUEST_KEY,isInnerRequest);
-            filterChain.doFilter(request,response);
+            UserThreadContext.setAttribute(UserThreadContext.REQUEST_WORK_REQUEST_KEY, isInnerRequest);
+            filterChain.doFilter(request, response);
         } finally {
             //清空当前线程副本
             UserThreadContext.requestEnd();
@@ -66,10 +66,10 @@ public class ContextFilter extends OncePerRequestFilter {
      * @param request
      * @return
      */
-    public UserVisitor getRequestInfo(HttpServletRequest request){
+    public UserVisitor getRequestInfo(HttpServletRequest request) {
         String logId = request.getAttribute(GlobalVar.LOGID).toString();
         String jwtToken = request.getHeader(AppRequestConstants.HEADER_JWTTOKEN);
-        UserVisitor visitor =  new UserVisitor();
+        UserVisitor visitor = new UserVisitor();
         visitor.setLogId(logId);
         visitor.setJwtToken(jwtToken);
         return visitor;

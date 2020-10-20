@@ -41,18 +41,23 @@
 1. 数据表配置：目前没有管理平台配置，需通过手工配置data_source表、api_source表和data_convert表；
 2. application.properties文件配置：根据项目中的配置模板完成对该文件的配置；
 3. 使用方法：启动项目后，POST访问接口，访问示例如下：
-curl --location --request POST 'http://localhost:8080/v1/data-paltform/getData?apiCode=apiCode1' \
+curl --location --request POST 'http://localhost:8080/v1/data-paltform/getData \
 --header 'Content-Type: application/json' \
 --data-raw '{
+    "apiCode":"apiCode1",
+    "paramJson":{
     "sqlparam1": "xx",
     "sqlparam2": xx
-}'
+    }
+   }'
 其中，sqlparam1和sqlparam2要对应该接口配置的query_sql中的where条件参数
 如示例的sql配置如下：select a1, a2, a3 from test where b1=#{sqlparam1} and #{sqlparam2}
 在分片sql中也支持该sql查询变量的配置。
 如果没有查询条件可不配，注意配置sql查询入参的时候只能用#{}的方式，不能用?和其他方式代替。
-4.支持xxl-job任务配置，定时任务的入参例如 { "apiCode":"xxx", "param1": "xx", "param2": "xxx" }
+4.支持xxl-job任务配置，定时任务的入参例如 { "apiCode":"xxx", "paramJson":{"param1": "xx", "param2": "xxx"} }
 入参以json字符串为键，其中apiCode是json的必须传入的键，其他的键值对参数由报表统计sql的where查询条件决定，
 查询条件没有入参，则无需传param值，传入{ "apiCode":"xxx"}即可，apiCode即接口代码。
-如果sql的where条件后带了#{param},则入参就是 { "apiCode":"xxx", "param": "xx" }
+如果sql的where条件后带了#{param},则入参就是 { "apiCode":"xxx", "param": "xx" },
+在接口http://localhost:8080/data-platform/v1/getDict?apiCode=bizTest中提供了字典项的翻译，里面有专门
+的在配置完sql后提供了查询字段和查询参数字段的查询。
 ```

@@ -17,28 +17,28 @@ import java.io.IOException;
 public class CorsFilter implements Filter {
 
 
-	@Override
-	public void init(FilterConfig filterConfig) {
-		SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, filterConfig.getServletContext());
-	}
+    @Override
+    public void init(FilterConfig filterConfig) {
+        SpringBeanAutowiringSupport.processInjectionBasedOnServletContext(this, filterConfig.getServletContext());
+    }
 
-	@Override
-	public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-			throws IOException, ServletException {
-		HttpServletRequest httpRequest = (HttpServletRequest) request;
-		HttpServletResponse httpResponse = (HttpServletResponse) response;
-		// 解决跨域问题
-		httpResponse.setHeader("Access-Control-Allow-Origin", httpRequest.getHeader("Origin"));
-		httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE,OPTIONS, PUT");
-		httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept," + FilterConstant.headers());
-		httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
-		httpResponse.setHeader("Access-Control-Expose-Headers", AppRequestConstants.HEADER_JWTTOKEN);
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+            throws IOException, ServletException {
+        HttpServletRequest httpRequest = (HttpServletRequest) request;
+        HttpServletResponse httpResponse = (HttpServletResponse) response;
+        // 解决跨域问题
+        httpResponse.setHeader("Access-Control-Allow-Origin", httpRequest.getHeader("Origin"));
+        httpResponse.setHeader("Access-Control-Allow-Methods", "POST, GET, DELETE,OPTIONS, PUT");
+        httpResponse.setHeader("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept," + FilterConstant.headers());
+        httpResponse.setHeader("Access-Control-Allow-Credentials", "true");
+        httpResponse.setHeader("Access-Control-Expose-Headers", AppRequestConstants.HEADER_JWTTOKEN);
 
-		chain.doFilter(request, response);
-	}
+        chain.doFilter(request, response);
+    }
 
-	@Override
-	public void destroy() {
-	}
+    @Override
+    public void destroy() {
+    }
 
 }

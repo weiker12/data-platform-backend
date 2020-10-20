@@ -57,13 +57,13 @@ public class MysqlConnector {
         SqlRowSetMetaData metaData = sqlRowSet.getMetaData();
         int count = metaData.getColumnCount();
         final String[] columnNames = new String[count];
-        for(int i = 0; i < count; i++) {
+        for (int i = 0; i < count; i++) {
             columnNames[i] = metaData.getColumnLabel(i + 1);
         }
         // 返回查询结果集的记录
-        List<BeanProxy> beanProxyList = jdbcTemplate.query(sql,  (rs, rowNum) -> {
+        List<BeanProxy> beanProxyList = jdbcTemplate.query(sql, (rs, rowNum) -> {
             BeanProxy beanProxy = new BeanProxy();
-            for(String columnName : columnNames) {
+            for (String columnName : columnNames) {
                 beanProxy.setValue(columnName, rs.getObject(columnName));
             }
             return beanProxy;

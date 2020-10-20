@@ -204,7 +204,7 @@ public class ApiConfigController {
         if (StringUtils.isNotBlank(dto.getQuerySql())) {
             // 从配置的sql中读取sql字段值
             fields.addAll(SqlUtils.getFields(dto.getQuerySql()));
-            params.addAll(SqlUtils.getParamField(dto.getQuerySql()));
+            params.addAll(SqlUtils.getParamFields(dto.getQuerySql()));
         } else {
             List<DataFlow> dataFlows = dto.getDataFlowList();
             // 从分片sql中读取字段值
@@ -215,7 +215,7 @@ public class ApiConfigController {
             }).flatMap(Collection::stream).distinct().collect(Collectors.toList());
             params = dataFlows.stream().map(flow -> {
                 String sql = flow.getQuerySql();
-                Set<String> list = SqlUtils.getParamField(sql);
+                Set<String> list = SqlUtils.getParamFields(sql);
                 return list;
             }).flatMap(Collection::stream).collect(Collectors.toList());
         }
@@ -223,7 +223,7 @@ public class ApiConfigController {
         dictMap.put("api_params", params);
         // 数据源代码字典项
         List<DataSource> dataSourceList = apiConfigService.getDataSourceList();
-        if(!CollectionUtils.isEmpty(dataSourceList)) {
+        if (!CollectionUtils.isEmpty(dataSourceList)) {
             List<String> dsCodeList = dataSourceList.stream().map(DataSource::getDsCode).collect(Collectors.toList());
             dictMap.put("dsCodes", dsCodeList);
         }

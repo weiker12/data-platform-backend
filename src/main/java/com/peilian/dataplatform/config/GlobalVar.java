@@ -13,10 +13,10 @@ public class GlobalVar {
     public static final String ISS = "data_platform";
     public static final String TTLS = "ttls";
     public static final int TTLS_VALUE = 864000;
-    
+
     // jwt token请求头
-    public static final String JWT_TOKEN="Jwt-Token";
+    public static final String JWT_TOKEN = "Jwt-Token";
     //日志ID key
     public static final String LOGID = "LogId";
-    
+
 }

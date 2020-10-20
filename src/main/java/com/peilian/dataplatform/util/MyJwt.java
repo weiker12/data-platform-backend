@@ -27,7 +27,7 @@ public class MyJwt implements Serializable {
      */
     private int ttls; //过期s数
     private String cellphone; // 用户手机号
-    
+
     @JsonIgnore
     private Integer status; //0正常 -1非法 -2已过期 -3jwt密钥非法 -4未提供
     @JsonIgnore

@@ -6,13 +6,14 @@ import java.lang.annotation.*;
 
 /**
  * 接口访问权限
+ *
  * @author hui.wang
  * @date 2020/5/9
  * @since 1.0.0
  */
 @Documented
 @Inherited
-@Target({ElementType.TYPE,ElementType.METHOD})
+@Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Auth {
 

@@ -30,14 +30,6 @@ public enum StatusType {
         this.name = name;
     }
 
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     /**
      * 根据code获取枚举类型
      *
@@ -46,8 +38,8 @@ public enum StatusType {
      */
     public static StatusType getByCode(String code) {
         StatusType[] types = StatusType.values();
-        for(StatusType type : types) {
-            if(type.getCode().equals(code)) {
+        for (StatusType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -62,8 +54,8 @@ public enum StatusType {
      */
     public static StatusType getByName(String code) {
         StatusType[] types = StatusType.values();
-        for(StatusType type : types) {
-            if(type.getCode().equals(code)) {
+        for (StatusType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -77,12 +69,20 @@ public enum StatusType {
      */
     public static List<DictDto> toDict() {
         List<DictDto> dicts = new ArrayList<>();
-        for(StatusType type : StatusType.values()) {
+        for (StatusType type : StatusType.values()) {
             DictDto dto = new DictDto();
             dto.setCode(type.getCode());
             dto.setName(type.getName());
             dicts.add(dto);
         }
         return dicts;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
     }
 }

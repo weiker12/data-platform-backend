@@ -7,7 +7,10 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  * @author zhengshangchao
@@ -44,14 +47,15 @@ public class StatisticsUtil {
     public static void listToFile(List<String> list, String filePath) throws IOException {
         Path path = Paths.get(filePath);
         File file = null;
-        if(Files.notExists(path)) {
+        if (Files.notExists(path)) {
             file = new File(filePath);
         }
         OutputStream os = new FileOutputStream(file);
         BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(os));
         for (Object str : list) {
             writer.write(str.toString());
-            writer.newLine();;
+            writer.newLine();
+            ;
         }
         writer.close();
         os.close();

@@ -18,6 +18,6 @@ public interface SmsRecordRepository extends JpaRepository<SmsRecord, Long>, Jpa
      * @param cellphone
      * @return
      */
-    @Query(value = "select code from sms_record where cellphone = ?1 and send_status = 1 and update_time > DATE_SUB(NOW(), INTERVAL 10 MINUTE) order by update_time desc limit 1",  nativeQuery = true)
+    @Query(value = "select code from sms_record where cellphone = ?1 and send_status = 1 and update_time > DATE_SUB(NOW(), INTERVAL 10 MINUTE) order by update_time desc limit 1", nativeQuery = true)
     Integer findSms(String cellphone);
 }

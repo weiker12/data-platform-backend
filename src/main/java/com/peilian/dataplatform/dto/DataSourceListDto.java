@@ -2,12 +2,8 @@ package com.peilian.dataplatform.dto;
 
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
-import org.hibernate.validator.constraints.Range;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-
-import javax.validation.constraints.Size;
-import java.io.Serializable;
 
 /**
  * 数据源配置表(DataSource)实体类

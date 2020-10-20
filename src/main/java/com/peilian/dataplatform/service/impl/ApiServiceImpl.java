@@ -183,7 +183,7 @@ public class ApiServiceImpl implements ApiService {
         String querySql = apiSource.getQuerySql();
         // 获取分片信息
         List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);
-        if(StringUtils.isEmpty(querySql)) {
+        if (StringUtils.isEmpty(querySql)) {
             Assert.notEmpty(dataFlowList, "分片sql信息配置dataFlowList不能为空！");
         }
         // api字段值
@@ -219,6 +219,7 @@ public class ApiServiceImpl implements ApiService {
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
         Assert.notNull(apiSource, "apiCode的配置为空！请配置api_source表");
         Assert.isTrue(StatusType.YES.getCode().equals(apiSource.getStatus()), "该接口配置已下架，请打开api_source表的配置status=1");
+
         // 校验data_source表配置信息
         String dsCode = apiSource.getDsCode();
         DataSource dataSource = dataSourceRepository.findByDsCode(dsCode);
@@ -237,14 +238,14 @@ public class ApiServiceImpl implements ApiService {
         Set<String> keys = jsonObject.keySet();
         Assert.notNull(jsonObject, "入参paramJson解析json失败！");
         if (!StringUtils.isEmpty(querySql)) {
-            Set<String> paramNames = SqlUtils.getParamField(querySql);
+            Set<String> paramNames = SqlUtils.getParamFields(querySql);
             Assert.isTrue(CollectionUtils.isEqualCollection(paramNames, keys), "入参paramsJson的参数配置和api_source表query_sql的where查询参数不对应");
         } else {
             Set<String> queryParams = new HashSet<>();
             for (DataFlow dataFlow : dataFlowList) {
                 String sql = dataFlow.getQuerySql();
                 Assert.hasText(sql, "dataFlow的sql不能配置为空！");
-                queryParams.addAll(SqlUtils.getParamField(sql));
+                queryParams.addAll(SqlUtils.getParamFields(sql));
             }
             Assert.isTrue(CollectionUtils.isEqualCollection(queryParams, keys), "入参paramsJson的参数配置和data_flow表query_sql的where查询参数不对应");
         }

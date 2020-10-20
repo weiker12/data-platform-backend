@@ -20,7 +20,7 @@ public class ConvertUtils {
      */
     public static Convert convert(String convertScript) {
         log.info("入参convertScript={}", convertScript);
-        if(StringUtils.isEmpty(convertScript)) {
+        if (StringUtils.isEmpty(convertScript)) {
             return null;
         }
         Convert convert = null;

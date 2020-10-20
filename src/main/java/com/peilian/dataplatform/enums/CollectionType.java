@@ -11,7 +11,7 @@ import java.util.List;
  * @author zhengshangchao
  */
 public enum CollectionType {
-    
+
     /**
      * all-全集
      */
@@ -30,14 +30,6 @@ public enum CollectionType {
         this.name = name;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     /**
      * 根据code获取枚举类型
      *
@@ -46,8 +38,8 @@ public enum CollectionType {
      */
     public static CollectionType getByCode(String code) {
         CollectionType[] types = CollectionType.values();
-        for(CollectionType type : types) {
-            if(type.getCode().equals(code)) {
+        for (CollectionType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -62,8 +54,8 @@ public enum CollectionType {
      */
     public static CollectionType getByName(String code) {
         CollectionType[] types = CollectionType.values();
-        for(CollectionType type : types) {
-            if(type.getCode().equals(code)) {
+        for (CollectionType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -77,12 +69,20 @@ public enum CollectionType {
      */
     public static List<DictDto> toDict() {
         List<DictDto> dicts = new ArrayList<>();
-        for(CollectionType type : CollectionType.values()) {
+        for (CollectionType type : CollectionType.values()) {
             DictDto dto = new DictDto();
             dto.setCode(type.getCode());
             dto.setName(type.getName());
             dicts.add(dto);
         }
         return dicts;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
     }
 }

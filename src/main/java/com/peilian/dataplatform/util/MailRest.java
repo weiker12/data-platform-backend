@@ -22,36 +22,28 @@ import java.util.Arrays;
 @Component
 public class MailRest {
 
-    @Value("${mail.api.url}")
-    private String mailUrl;
-
-    @Value("${mail.title}")
-    private String mailTitle;
-
-    @Value("${mail.msName}")
-    private String msName;
-
-    @Value("${mail.keyword}")
-    private String keyword;
-
-    @Value("${dingding.api.url}")
-    private String dingdingUrl;
-
-    @Value("${dingding.api.type}")
-    private String dingdingType;
-
-    @Value("${dingding.api.phone}")
-    private String dingdingPhone;
-
     /**
      * 1-html
      */
     private static final int CONTENT_TYPE_HTML = 1;
-
     /**
      * 1-默认全部
      */
     private static final int TYPE_ALL = 1;
+    @Value("${mail.api.url}")
+    private String mailUrl;
+    @Value("${mail.title}")
+    private String mailTitle;
+    @Value("${mail.msName}")
+    private String msName;
+    @Value("${mail.keyword}")
+    private String keyword;
+    @Value("${dingding.api.url}")
+    private String dingdingUrl;
+    @Value("${dingding.api.type}")
+    private String dingdingType;
+    @Value("${dingding.api.phone}")
+    private String dingdingPhone;
 
     /**
      * 发送报警邮件

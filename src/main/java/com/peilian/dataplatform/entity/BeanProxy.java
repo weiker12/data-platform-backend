@@ -32,7 +32,7 @@ public class BeanProxy {
     public JSONObject getData() {
         JSONObject jsonObject = new JSONObject();
         Set<String> fields = container.keySet();
-        for(String field : fields) {
+        for (String field : fields) {
             Object value = container.get(field);
             jsonObject.put(field, value);
         }

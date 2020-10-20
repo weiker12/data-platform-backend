@@ -31,14 +31,6 @@ public enum SendType {
         this.name = name;
     }
 
-    public Integer getCode() {
-        return code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     /**
      * 根据code获取枚举类型
      *
@@ -47,8 +39,8 @@ public enum SendType {
      */
     public static SendType getByCode(String code) {
         SendType[] types = SendType.values();
-        for(SendType type : types) {
-            if(type.getCode().equals(code)) {
+        for (SendType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -63,8 +55,8 @@ public enum SendType {
      */
     public static SendType getByName(String code) {
         SendType[] types = SendType.values();
-        for(SendType type : types) {
-            if(type.getCode().equals(code)) {
+        for (SendType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -78,13 +70,21 @@ public enum SendType {
      */
     public static List<DictDto> toDict() {
         List<DictDto> dicts = new ArrayList<>();
-        for(SendType type : SendType.values()) {
+        for (SendType type : SendType.values()) {
             DictDto dto = new DictDto();
             dto.setCode(type.getCode());
             dto.setName(type.getName());
             dicts.add(dto);
         }
         return dicts;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

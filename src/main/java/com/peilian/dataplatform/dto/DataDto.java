@@ -3,11 +3,7 @@ package com.peilian.dataplatform.dto;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 import net.sf.json.JSONObject;
-import org.hibernate.validator.constraints.Range;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
-import javax.validation.constraints.Size;
 import java.io.Serializable;
 
 /**

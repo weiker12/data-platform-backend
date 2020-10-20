@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 /**
  * sql工具
+ *
  * @author zhengshangchao
  */
 @Slf4j
@@ -39,12 +40,12 @@ public class SqlUtils {
      * @param sql
      * @return
      */
-    public static Set<String> getParamField(String sql) {
+    public static Set<String> getParamFields(String sql) {
         checkSql(sql);
         Pattern pattern = Pattern.compile(SQL_PARAM_REGEX);
         Matcher matcher = pattern.matcher(sql);
         Set<String> paramList = new HashSet<>();
-        while(matcher.find()) {
+        while (matcher.find()) {
             String matchStr = matcher.group();
             String param = matchStr.replace("#", "").replace("{", "").replace("}", "");
             paramList.add(param);
@@ -64,9 +65,9 @@ public class SqlUtils {
         String paramStr = formatSql.substring("select".length(), formatSql.indexOf("from")).trim();
         String[] array = paramStr.split(",");
         List<String> paramList = new ArrayList<>();
-        for(int i = 0; i < array.length; i++) {
+        for (int i = 0; i < array.length; i++) {
             String param = array[i].trim();
-            if(!param.contains(" ")) {
+            if (!param.contains(" ")) {
                 paramList.add(param);
             } else {
                 paramList.add(param.substring(param.lastIndexOf(" ")).trim());
@@ -89,7 +90,7 @@ public class SqlUtils {
         checkSql(sql);
         Pattern pattern = Pattern.compile(SQL_PARAM_REGEX);
         Matcher matcher = pattern.matcher(sql);
-        while(matcher.find()) {
+        while (matcher.find()) {
             String matchStr = matcher.group();
             String param = matchStr.replace("#", "").replace("{", "").replace("}", "");
             Object value = params.get(param);

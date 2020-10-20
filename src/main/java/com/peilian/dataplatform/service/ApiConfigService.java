@@ -1,11 +1,13 @@
 package com.peilian.dataplatform.service;
 
 import com.peilian.dataplatform.config.BizException;
-import com.peilian.dataplatform.dto.*;
+import com.peilian.dataplatform.dto.ApiInfoListDto;
+import com.peilian.dataplatform.dto.ApiSourceDto;
+import com.peilian.dataplatform.dto.DataSourceDto;
+import com.peilian.dataplatform.dto.DataSourceListDto;
 import com.peilian.dataplatform.entity.ApiSource;
 import com.peilian.dataplatform.entity.DataSource;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -53,8 +55,8 @@ public interface ApiConfigService {
      * 获取接口信息详情
      *
      * @param apiCode
-     * @throws Exception
      * @return ApiSourceDto
+     * @throws Exception
      */
     ApiSourceDto getApiInfo(String apiCode) throws Exception;
 

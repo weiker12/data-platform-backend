@@ -30,14 +30,6 @@ public enum ResultType {
         this.name = name;
     }
 
-    public String getCode() {
-        return code;
-    }
-
-    public String getName() {
-        return name;
-    }
-
     /**
      * 根据code获取枚举类型
      *
@@ -46,8 +38,8 @@ public enum ResultType {
      */
     public static ResultType getByCode(String code) {
         ResultType[] types = ResultType.values();
-        for(ResultType type : types) {
-            if(type.getCode().equals(code)) {
+        for (ResultType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -62,8 +54,8 @@ public enum ResultType {
      */
     public static ResultType getByName(String code) {
         ResultType[] types = ResultType.values();
-        for(ResultType type : types) {
-            if(type.getCode().equals(code)) {
+        for (ResultType type : types) {
+            if (type.getCode().equals(code)) {
                 return type;
             }
         }
@@ -77,13 +69,21 @@ public enum ResultType {
      */
     public static List<DictDto> toDict() {
         List<DictDto> dicts = new ArrayList<>();
-        for(ResultType type : ResultType.values()) {
+        for (ResultType type : ResultType.values()) {
             DictDto dto = new DictDto();
             dto.setCode(type.getCode());
             dto.setName(type.getName());
             dicts.add(dto);
         }
         return dicts;
+    }
+
+    public String getCode() {
+        return code;
+    }
+
+    public String getName() {
+        return name;
     }
 
 }

@@ -28,26 +28,20 @@ import java.util.Objects;
 @Component
 public class SmsUtil {
 
-    @Value("${jwt.key}")
-    private String jwtKey;
-
-    @Value("${sms.tencent.appId}")
-    private String smsApiId;
-
-    @Value("${sms.tencent.key}")
-    private String smsKey;
-
-    @Value("${sms.white.list}")
-    private String whiteList;
-
-    @Autowired
-    private SmsRecordRepository smsRecordRepository;
-
     /**
      * 短信国家代码 +86
      */
     private static final String COUNTRY_CODE = "+86";
-
+    @Value("${jwt.key}")
+    private String jwtKey;
+    @Value("${sms.tencent.appId}")
+    private String smsApiId;
+    @Value("${sms.tencent.key}")
+    private String smsKey;
+    @Value("${sms.white.list}")
+    private String whiteList;
+    @Autowired
+    private SmsRecordRepository smsRecordRepository;
     /**
      * 短信发送频率超限
      * 1013	下发短信/语音命中了频率限制策略	可自行到控制台调整短信频率限制策略，如有其他需求请联系
@@ -56,7 +50,7 @@ public class SmsUtil {
      * 1025	单个手机号日下发短信条数超过设定的上限	可自行到控制台调整短信频率限制策略
      * 1026	单个手机号下发相同内容超过设定的上限	可自行到控制台调整短信频率限制策略
      */
-    private List<Integer> sendLimitCode = Arrays.asList(1013,1023,1024,1025,1026);
+    private List<Integer> sendLimitCode = Arrays.asList(1013, 1023, 1024, 1025, 1026);
 
     /**
      * 发送短信验证码
@@ -69,7 +63,7 @@ public class SmsUtil {
         // 校验手机号码的格式
         Validator.isMobile(cellphone);
         // 校验白名单
-        if(StringUtils.isNotBlank(whiteList) && !whiteList.contains(cellphone)) {
+        if (StringUtils.isNotBlank(whiteList) && !whiteList.contains(cellphone)) {
             throw new BizException("手机号不在白名单！");
         }
         String code = generateSmsCode(cellphone);
@@ -80,6 +74,7 @@ public class SmsUtil {
     /**
      * 生成6位数字验证码
      * 在缓存中保存
+     *
      * @param cellphone
      * @return
      */
@@ -115,14 +110,14 @@ public class SmsUtil {
             SmsSingleSender sender = new SmsSingleSender(Integer.valueOf(smsApiId), smsKey);
             SmsSingleSenderResult result = sender.send(0, COUNTRY_CODE.replace("+", ""), mobile,
                     smsContent, "", "");
-            log.info("tencent sendSMS result:{}" ,result);
+            log.info("tencent sendSMS result:{}", result);
             SmsRecord smsRecord = new SmsRecord();
             smsRecord.setCellphone(mobile);
             smsRecord.setCode(code);
             smsRecord.setUseStatus(0);
             smsRecord.setSmsType(10);
             smsRecord.setSendStatus(0);
-            if(result.result == 0) {
+            if (result.result == 0) {
                 smsRecord.setSendStatus(1);
                 long end = System.currentTimeMillis();
                 long spendTime = (end - start);

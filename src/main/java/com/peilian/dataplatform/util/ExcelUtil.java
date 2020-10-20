@@ -1,24 +1,13 @@
 package com.peilian.dataplatform.util;
 
-import com.alibaba.excel.write.metadata.style.WriteCellStyle;
-import com.alibaba.excel.write.metadata.style.WriteFont;
-import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import net.sf.json.JSONObject;
-import org.apache.poi.ss.usermodel.FillPatternType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.util.Assert;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
-
-import static org.apache.poi.ss.usermodel.BorderStyle.DASHED;
 
 /**
  * excel处理工具
@@ -46,7 +35,7 @@ public class ExcelUtil {
      */
     public static List<List<String>> getHead(List<String> headLine) {
         List<List<String>> list = new ArrayList<>();
-        for(String line : headLine) {
+        for (String line : headLine) {
             List<String> head = new ArrayList<>();
             head.add(line);
             list.add(head);
@@ -64,9 +53,9 @@ public class ExcelUtil {
     public static List<List<Object>> getBody(List<JSONObject> contents, List<String> heads) {
         Assert.notEmpty(heads, "heads不能为空！");
         List<List<Object>> result = new LinkedList<>();
-        for(JSONObject jsonObject : contents) {
+        for (JSONObject jsonObject : contents) {
             List<Object> row = new LinkedList<>();
-            for(String head : heads) {
+            for (String head : heads) {
                 row.add(jsonObject.get(head));
             }
             result.add(row);

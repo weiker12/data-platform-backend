@@ -16,8 +16,8 @@ public interface ApiService {
      * 返回类型array
      *
      * @param dataDto
-     * @throws Exception
      * @return
+     * @throws Exception
      */
     List<JSONObject> queryList(DataDto dataDto) throws Exception;
 
@@ -26,8 +26,8 @@ public interface ApiService {
      * 返回类型object
      *
      * @param dataDto
-     * @throws Exception
      * @return
+     * @throws Exception
      */
     JSONObject query(DataDto dataDto) throws Exception;
 

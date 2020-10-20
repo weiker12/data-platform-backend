@@ -75,7 +75,7 @@ public class ApiController {
     public void getExcel(@RequestBody DataDto dataDto, HttpServletResponse response) throws Exception {
         log.info("入参dataDto={}", dataDto);
         String apiCode = dataDto.getApiCode();
-        ApiSourceDto sourceDto =  apiConfigService.getApiInfo(apiCode);
+        ApiSourceDto sourceDto = apiConfigService.getApiInfo(apiCode);
         String fileName = ExcelUtil.getFileName(sourceDto.getApiName());
         List<String> headLine = apiService.getHead(apiCode);
         List<JSONObject> jsonDataList = apiService.queryList(dataDto);
