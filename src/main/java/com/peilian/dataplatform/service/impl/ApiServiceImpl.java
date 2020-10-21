@@ -98,7 +98,7 @@ public class ApiServiceImpl implements ApiService {
         // 如果querySql配置为空则启用分片SQL执行功能
         List<JSONObject> jsonObjects;
         if (StringUtils.isEmpty(querySql)) {
-            // 定义集合的去重容器
+            // 定义集合的去重容器进行分片运算
             Set<JSONObject> allSet = new HashSet<>();
             Set<JSONObject> subSet = new HashSet<>();
             for (DataFlow dataFlow : dataFlowList) {

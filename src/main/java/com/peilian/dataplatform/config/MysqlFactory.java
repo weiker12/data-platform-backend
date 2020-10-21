@@ -1,8 +1,6 @@
 package com.peilian.dataplatform.config;
 
 import com.peilian.dataplatform.entity.DataSource;
-import com.peilian.dataplatform.repository.DataSourceRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 

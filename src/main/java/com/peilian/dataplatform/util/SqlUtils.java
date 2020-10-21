@@ -1,6 +1,7 @@
 package com.peilian.dataplatform.util;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.util.Assert;
 
 import java.util.*;
@@ -67,6 +68,10 @@ public class SqlUtils {
         List<String> paramList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
             String param = array[i].trim();
+            // 提取sql结果集时按逗号来提取，但要过滤掉mysql函数产生的逗号 如select sum(x,y) z from test;最终提取的结果是z而非sum(x和z
+            if(StringUtils.countMatches(param, "(") > StringUtils.countMatches(param,")")) {
+                continue;
+            }
             if (!param.contains(" ")) {
                 paramList.add(param);
             } else {
