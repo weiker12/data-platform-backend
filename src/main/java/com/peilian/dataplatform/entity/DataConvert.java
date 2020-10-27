@@ -7,6 +7,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
@@ -45,6 +46,7 @@ public class DataConvert {
      * bsh转换脚本
      */
     @Column(name = "convert_script")
+    @NotBlank(message = "convert_script配置不能为空")
     private String convertScript;
 
     /**

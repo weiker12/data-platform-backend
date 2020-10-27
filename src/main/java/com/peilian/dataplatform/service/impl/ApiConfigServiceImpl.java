@@ -242,6 +242,7 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         List<DataConvert> dataConverts = apiSourceDto.getDataConvertList();
         dataConvertRepository.deleteByApiCode(apiCode);
         if (!CollectionUtils.isEmpty(dataConverts)) {
+            checkConvertScript(dataConverts);
             dataConverts.stream().forEach(dataConvert -> dataConvert.setApiCode(apiCode));
             dataConvertRepository.saveAll(dataConverts);
         }
@@ -284,4 +285,33 @@ public class ApiConfigServiceImpl implements ApiConfigService {
         }
     }
 
+    /**
+     * 检查转换脚本
+     *
+     * @param dataConverts
+     */
+    private void checkConvertScript(List<DataConvert> dataConverts) throws BizException {
+        if(CollectionUtils.isEmpty(dataConverts)) {
+            return;
+        }
+        for (DataConvert dataConvert : dataConverts) {
+            String convertScript = dataConvert.getConvertScript();
+            if(StringUtils.isEmpty(convertScript)) {
+                continue;
+            }
+            int count = 0;
+            int index = 0;
+            String trimScript = convertScript.replaceAll("\\s*", "");;
+            while((index = convertScript.indexOf("String", index)) != -1) {
+                count++;
+                index += "String".length();
+            }
+            if(trimScript.indexOf("String") != 0 || count < 2) {
+                throw new BizException("请在bsh脚本中的入参和返参必须设置为String类型");
+            }
+            if(!trimScript.contains("convert(String")) {
+                throw new BizException("请在bsh脚本中实现String convert(String str) { return xxx; }为接口模板的脚本处理程序且方法名必须为convert");
+            }
+        }
+    }
 }
