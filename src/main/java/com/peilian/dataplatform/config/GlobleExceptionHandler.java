@@ -23,7 +23,7 @@ public class GlobleExceptionHandler {
             String errorMsg = bizException.getMessage();
             return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), errorMsg);
         } else {
-            return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), ex.toString());
+            return Result.error(ResponseMessageCode.INTERNAL_SERVER_ERROR.getCode(), ex.getMessage());
         }
     }
 }
