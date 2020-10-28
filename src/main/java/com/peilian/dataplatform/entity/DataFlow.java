@@ -6,6 +6,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -36,11 +37,13 @@ public class DataFlow implements Serializable {
      * 执行sql
      */
     @Column(name = "query_sql")
+    @NotBlank(message = "querySql不能为空")
     private String querySql;
     /**
      * sql执行结果集的集合类型
      */
     @Column(name = "collection_type")
+    @NotBlank(message = "collectionType不能为空")
     @Pattern(regexp = "all|sub", message = "collectionType必须为all或者sub类型")
     private String collectionType;
     /**

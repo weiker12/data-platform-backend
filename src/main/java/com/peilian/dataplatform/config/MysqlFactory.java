@@ -4,6 +4,8 @@ import com.peilian.dataplatform.entity.DataSource;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -19,7 +21,7 @@ public class MysqlFactory {
     /**
      * 以dsCode为键的缓存MysqlConnector，避免频繁创建MysqlConnector产生开销
      */
-    private final static Map<String, MysqlConnector> cacheMap= new HashMap<>();
+    private final static Map<String, MysqlConnector> cacheMap = new HashMap<>();
 
 
     /**
@@ -35,7 +37,10 @@ public class MysqlFactory {
         String username = dataSource.getUsername();
         String password = dataSource.getPassword();
         MysqlConnector mysqlConnector = cacheMap.get(dsCode);
-        if(Objects.isNull(mysqlConnector)) {
+        LocalDateTime updateTime = dataSource.getUpdateTime();
+        // 如果当前更新了数据库的连接信息配置则需更新缓存的map，目前根据当前时间来判断
+        boolean updateFlag = updateTime.isAfter(LocalDate.now().atStartOfDay());
+        if(Objects.isNull(mysqlConnector) || updateFlag) {
             mysqlConnector = new MysqlConnector(url, username, password);
             cacheMap.put(dsCode, mysqlConnector);
         }

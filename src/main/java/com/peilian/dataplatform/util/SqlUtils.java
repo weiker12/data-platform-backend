@@ -67,7 +67,7 @@ public class SqlUtils {
         String[] array = paramStr.split(",");
         List<String> paramList = new ArrayList<>();
         for (int i = 0; i < array.length; i++) {
-            String param = array[i].trim();
+            String param = array[i].trim().replace("'", "");
             // 提取sql结果集时按逗号来提取，但要过滤掉mysql函数产生的逗号 如select sum(x,y) z from test;最终提取的结果是z而非sum(x和z
             if(StringUtils.countMatches(param, "(") > StringUtils.countMatches(param,")")) {
                 continue;

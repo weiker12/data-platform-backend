@@ -5,10 +5,7 @@ import com.peilian.dataplatform.common.AuthEnum;
 import com.peilian.dataplatform.config.BizException;
 import com.peilian.dataplatform.config.ResponseMessage;
 import com.peilian.dataplatform.config.Result;
-import com.peilian.dataplatform.dto.ApiInfoListDto;
-import com.peilian.dataplatform.dto.ApiSourceDto;
-import com.peilian.dataplatform.dto.DataSourceDto;
-import com.peilian.dataplatform.dto.DataSourceListDto;
+import com.peilian.dataplatform.dto.*;
 import com.peilian.dataplatform.entity.ApiSource;
 import com.peilian.dataplatform.entity.DataFlow;
 import com.peilian.dataplatform.entity.DataSource;
@@ -152,30 +149,30 @@ public class ApiConfigController {
     /**
      * 删除数据源配置信息
      *
-     * @param id
+     * @param sourceDto
      * @return
      */
     @ApiOperation(value = "删除数据源配置信息")
     @PostMapping("/delDataSource")
     @Auth(value = AuthEnum.APP_ALL)
-    public ResponseMessage delDataSource(@RequestParam("id") Long id) {
-        log.info("入参id={}", id);
-        apiConfigService.delDataSource(id);
+    public ResponseMessage delDataSource(@RequestBody SourceDto sourceDto) {
+        log.info("入参sourceDto={}", sourceDto);
+        apiConfigService.delDataSource(sourceDto.getId());
         return Result.success();
     }
 
     /**
      * 删除数据报表信息
      *
-     * @param apiCode
+     * @param apiInfoDto
      * @return
      */
     @ApiOperation(value = "删除数据报表信息")
     @PostMapping("/delApiInfo")
     @Auth(value = AuthEnum.APP_ALL)
-    public ResponseMessage delApiInfo(@RequestParam("apiCode") String apiCode) {
-        log.info("入参apiCode={}, paramsJson={}", apiCode);
-        apiConfigService.delApiInfo(apiCode);
+    public ResponseMessage delApiInfo(@RequestBody ApiInfoDto apiInfoDto) {
+        log.info("入参apiCode={}", apiInfoDto.getApiCode());
+        apiConfigService.delApiInfo(apiInfoDto.getApiCode());
         return Result.success();
     }
 
@@ -189,13 +186,22 @@ public class ApiConfigController {
     @ApiOperation(value = "获取该接口配置清单的字典项")
     @GetMapping("/getDict")
     @Auth(value = AuthEnum.APP_ALL)
-    public ResponseMessage getDict(@RequestParam(value = "apiCode") String apiCode) throws Exception {
-        log.info("入参dsCode={}", apiCode);
+    public ResponseMessage getDict(@RequestParam(value = "apiCode", required = false) String apiCode) throws Exception {
+        log.info("入参sql={}", apiCode);
         Map<String, Object> dictMap = new HashMap<>(16);
         dictMap.put("status", StatusType.toDict());
         dictMap.put("send", SendType.toDict());
-        dictMap.put("result_type", ResultType.toDict());
-        dictMap.put("collect_type", CollectionType.toDict());
+        dictMap.put("resultType", ResultType.toDict());
+        dictMap.put("collectType", CollectionType.toDict());
+        // 数据源代码字典项
+        List<DataSource> dataSourceList = apiConfigService.getDataSourceList();
+        if (!CollectionUtils.isEmpty(dataSourceList)) {
+            List<String> dsCodeList = dataSourceList.stream().map(DataSource::getDsCode).collect(Collectors.toList());
+            dictMap.put("dsCodes", dsCodeList);
+        }
+        if(StringUtils.isEmpty(apiCode)) {
+            return Result.success(dictMap);
+        }
         ApiSourceDto dto = apiConfigService.getApiInfo(apiCode);
         // api字段值字典项
         List<String> fields = new ArrayList<>();
@@ -219,14 +225,35 @@ public class ApiConfigController {
                 return list;
             }).flatMap(Collection::stream).collect(Collectors.toList());
         }
-        dictMap.put("api_fields", fields);
-        dictMap.put("api_params", params);
-        // 数据源代码字典项
-        List<DataSource> dataSourceList = apiConfigService.getDataSourceList();
-        if (!CollectionUtils.isEmpty(dataSourceList)) {
-            List<String> dsCodeList = dataSourceList.stream().map(DataSource::getDsCode).collect(Collectors.toList());
-            dictMap.put("dsCodes", dsCodeList);
+        dictMap.put("apiFields", fields);
+        dictMap.put("apiParams", params);
+        return Result.success(dictMap);
+    }
+
+    /**
+     * 获取该接口配置清单的字典项
+     *
+     * @param sqlInfoDto
+     * @return
+     */
+    @ApiOperation(value = "获取该接口配置清单的字典项")
+    @PostMapping("/getSqlInfo")
+    @Auth(value = AuthEnum.APP_ALL)
+    public ResponseMessage getSqlInfo(@RequestBody SqlInfoDto sqlInfoDto) throws Exception {
+        log.info("入参sqlInfoDto={}", sqlInfoDto);
+        String sql = sqlInfoDto.getSql();
+        Map<String, Object> dictMap = new HashMap<>(16);
+        // api字段值字典项
+        List<String> fields = new ArrayList<>();
+        // api查询参数字典项
+        List<String> params = new ArrayList<>();
+        if (StringUtils.isNotBlank(sql)) {
+            // 从配置的sql中读取sql字段值
+            fields.addAll(SqlUtils.getFields(sql));
+            params.addAll(SqlUtils.getParamFields(sql));
         }
+        dictMap.put("apiFields", fields);
+        dictMap.put("apiParams", params);
         return Result.success(dictMap);
     }
 

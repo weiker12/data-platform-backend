@@ -134,7 +134,7 @@ public class ApiServiceImpl implements ApiService {
         // 校验to_send开关是否打开，如果打开则发送消息
         if (SendType.YES.getCode().equals(apiSource.getToSend())) {
             sendMail(jsonObjects, apiSource.getApiName());
-            sendDingTalk(jsonObjects);
+            //sendDingTalk(jsonObjects);
         }
         return jsonObjects;
     }
