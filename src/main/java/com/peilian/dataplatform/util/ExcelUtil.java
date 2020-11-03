@@ -24,7 +24,7 @@ public class ExcelUtil {
      */
     public static String getFileName(String apiName) {
         Assert.hasText(apiName, "apiName不能为空");
-        return String.format("%s_%s", apiName, LocalDate.now(ZoneOffset.of("+8")));
+        return String.format("%s_%s.xlsx", apiName, LocalDate.now(ZoneOffset.of("+8")));
     }
 
     /**

@@ -218,13 +218,13 @@ public class ApiServiceImpl implements ApiService {
         // 校验api_source表配置信息
         ApiSource apiSource = apiSourceRepository.findByApiCode(apiCode);
         Assert.notNull(apiSource, "apiCode的配置为空！请配置api_source表");
-        Assert.isTrue(StatusType.YES.getCode().equals(apiSource.getStatus()), "该接口配置已下架，请打开api_source表的配置status=1");
+        Assert.isTrue(StatusType.YES.getCode().equals(apiSource.getStatus()), String.format("该接口配置已下架，请打开api_source表的api_code=%s所在记录配置status=1", apiCode));
 
         // 校验data_source表配置信息
         String dsCode = apiSource.getDsCode();
         DataSource dataSource = dataSourceRepository.findByDsCode(dsCode);
         Assert.notNull(dataSource, "数据源配置不能为空！请配置data_source表");
-        Assert.isTrue(StatusType.YES.getCode().equals(dataSource.getStatus()), "该接口配置已下架，请打开dataSource表的配置status=1");
+        Assert.isTrue(StatusType.YES.getCode().equals(dataSource.getStatus()), String.format("该接口数据源配置已下架，请打开data_source表的ds_code=%s所在记录配置status=1", dsCode));
 
         // 校验data_flow表配置信息
         List<DataFlow> dataFlowList = dataFlowRepository.findByApiCode(apiCode);

@@ -20,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
-import java.net.URLEncoder;
 import java.util.List;
 
 /**
@@ -76,16 +75,20 @@ public class ApiController {
         log.info("入参dataDto={}", dataDto);
         String apiCode = dataDto.getApiCode();
         ApiSourceDto sourceDto = apiConfigService.getApiInfo(apiCode);
-        String fileName = ExcelUtil.getFileName(sourceDto.getApiName());
+        String fileName = ExcelUtil.getFileName(apiCode);
         List<String> headLine = apiService.getHead(apiCode);
         List<JSONObject> jsonDataList = apiService.queryList(dataDto);
         List<List<Object>> contents = ExcelUtil.getBody(jsonDataList, headLine);
         List<List<String>> heads = ExcelUtil.getHead(headLine);
-        response.setHeader("Content-disposition", "attachment; filename=" + URLEncoder.encode(fileName, "UTF-8") + ".xlsx");
-        response.setContentType("application/vnd.ms-excel");
+        response.setHeader("Content-disposition", "attachment; filename=" + fileName);
+        response.setContentType("application/vnd.ms-excel;charset=utf-8");
         response.setCharacterEncoding("utf-8");
-        EasyExcel.write(response.getOutputStream()).excelType(ExcelTypeEnum.XLSX).autoCloseStream(false).sheet(sourceDto.getApiName())
-                .autoTrim(true).registerWriteHandler(ExcelUtil.getCustomCellWriteHandler()).head(heads).doWrite(contents);
+        EasyExcel.write(response.getOutputStream())
+                .excelType(ExcelTypeEnum.XLSX)
+                .autoCloseStream(false)
+                .sheet(sourceDto.getApiName())
+                .autoTrim(true)
+                .registerWriteHandler(ExcelUtil.getCustomCellWriteHandler()).head(heads).doWrite(contents);
     }
 
 }
