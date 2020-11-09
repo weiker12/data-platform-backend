@@ -2,6 +2,8 @@ package com.peilian.dataplatform.controller;
 
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.support.ExcelTypeEnum;
+import com.alibaba.excel.write.metadata.style.WriteCellStyle;
+import com.alibaba.excel.write.style.column.LongestMatchColumnWidthStyleStrategy;
 import com.peilian.dataplatform.common.Auth;
 import com.peilian.dataplatform.common.AuthEnum;
 import com.peilian.dataplatform.config.ResponseMessage;
@@ -88,6 +90,7 @@ public class ApiController {
                 .autoCloseStream(false)
                 .sheet(sourceDto.getApiName())
                 .autoTrim(true)
+                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy())
                 .registerWriteHandler(ExcelUtil.getCustomCellWriteHandler()).head(heads).doWrite(contents);
     }
 
