@@ -20,6 +20,11 @@ public class MailSend implements Serializable {
     private String title;
 
     /**
+     * 发送邮件别名
+     */
+    private String fromNick;
+
+    /**
      * 邮件内容
      */
     private String content;

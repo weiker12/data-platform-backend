@@ -62,6 +62,7 @@ public class ApiServiceImpl implements ApiService {
     @Autowired
     private MailRest mailRest;
 
+
     /**
      * 根据接口代码和传参进行信息查询
      * 1. 检查api_source表、data_source表和data_flow表的配置信息
@@ -133,7 +134,7 @@ public class ApiServiceImpl implements ApiService {
         log.info("apiCode={}处理完毕，产生{}条数据", apiCode, jsonObjects.size());
         // 校验to_send开关是否打开，如果打开则发送消息
         if (SendType.YES.getCode().equals(apiSource.getToSend())) {
-            sendMail(jsonObjects, apiSource.getApiName());
+            //sendMail(jsonObjects, apiSource.getApiName());
             //sendDingTalk(jsonObjects);
         }
         return jsonObjects;
@@ -232,7 +233,6 @@ public class ApiServiceImpl implements ApiService {
         boolean querySqlConig = !StringUtils.isEmpty(querySql);
         boolean dataFlowConfig = !CollectionUtils.isEmpty(dataFlowList);
         Assert.isTrue((querySqlConig && !dataFlowConfig) || (!querySqlConig && dataFlowConfig), "配置querySql不能启用sql分片功能，没有配置query_sql功能必须启用sql分片功能");
-
         // 校验paramsJson对query_sql中的where参数配置
         JSONObject jsonObject = JSONObject.fromObject(paramsJson);
         Set<String> keys = jsonObject.keySet();
@@ -272,7 +272,7 @@ public class ApiServiceImpl implements ApiService {
             for (String key : keys) {
                 String convertScript = convertMap.get(key);
                 // 根据bsh脚本获取convert处理器
-                Convert convert = ConvertUtils.convert(convertScript);
+                Convert<String> convert = ConvertUtils.convert(convertScript);
                 for (JSONObject jsonObject : jsonObjects) {
                     // 完成bsh脚本的特殊转化
                     String convertResult = convert.convert(jsonObject.getString(key));

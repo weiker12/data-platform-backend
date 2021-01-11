@@ -30,6 +30,11 @@ public class MailRest {
      * 1-默认全部
      */
     private static final int TYPE_ALL = 1;
+    /**
+     * 邮件提醒抬头
+     */
+    private static final String fromNick = "★数据报表统计提醒★";
+
     @Value("${mail.api.url}")
     private String mailUrl;
     @Value("${mail.title}")
@@ -57,13 +62,14 @@ public class MailRest {
         Assert.hasText(sendTo, "邮件发送的目标邮箱不能为空");
         Assert.hasText(content, "邮件内容不能为空");
         MailSend mailSend = new MailSend();
+        mailSend.setFromNick(fromNick);
         mailSend.setContentType(CONTENT_TYPE_HTML);
         mailSend.setContent(content);
         mailSend.setType(TYPE_ALL);
         mailSend.setTo(sendTo);
-        mailSend.setTitle(this.mailTitle);
-        mailSend.setMsName(this.msName);
-        mailSend.setKeyword(this.keyword);
+        mailSend.setTitle(mailTitle);
+        mailSend.setMsName(msName);
+        mailSend.setKeyword(keyword);
         String requestJson = JSONObject.fromObject(mailSend).toString();
         log.info(String.format("邮件发送内容:%s", requestJson));
         RestTemplate template = new RestTemplate();

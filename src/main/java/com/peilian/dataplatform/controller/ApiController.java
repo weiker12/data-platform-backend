@@ -49,7 +49,7 @@ public class ApiController {
      */
     @ApiOperation(value = "根据apiCode获取报表数据的接口")
     @PostMapping("/getData")
-    @Auth(value = AuthEnum.APP_ALL)
+    @Auth(value = AuthEnum.NO_LOGIN)
     public ResponseMessage getData(@RequestBody DataDto dataDto) throws Exception {
         log.info("dataDto={}", dataDto);
         ResultType resultType = apiService.getResultType(dataDto.getApiCode());

@@ -5,7 +5,7 @@ package com.peilian.dataplatform.util;
  *
  * @author zhengshangchao
  */
-public interface Convert {
+public interface Convert<T> {
 
     /**
      * str为要做特殊处理的字符串
@@ -14,6 +14,6 @@ public interface Convert {
      * @param str
      * @return
      */
-    String convert(String str);
+    T convert(T str);
 
 }

@@ -4,7 +4,10 @@ package com.peilian.dataplatform.enums;
  * 业务错误码
  */
 public enum CodeMsg {
-
+    /**
+     * 参数信息异常
+     */
+    CODE_1000(1000,"参数信息异常"),
     /**
      * 账号登录校验
      */

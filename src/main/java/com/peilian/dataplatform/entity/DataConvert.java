@@ -50,13 +50,6 @@ public class DataConvert {
     private String convertScript;
 
     /**
-     * 状态 0-无效 1-有效 默认1
-     */
-    @Column(name = "status")
-    @Range(min = 0, max = 1, message = "status枚举类型的值必须为0或1")
-    private Integer status;
-
-    /**
      * 最近创建时间
      */
     @Column(name = "create_time")

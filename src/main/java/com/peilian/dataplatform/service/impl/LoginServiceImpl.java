@@ -38,9 +38,9 @@ public class LoginServiceImpl implements LoginService {
     @Override
     public String login(LoginDto loginDto) throws BizException {
         String smsCode = smsUtil.getSmsCacheCode(loginDto.getCellphone());
-        if (!loginDto.getSmsCode().equals(smsCode)) {
-            throw new BizException("请输入正确的验证码");
-        }
+//        if (!loginDto.getSmsCode().equals(smsCode)) {
+//            throw new BizException("请输入正确的验证码");
+//        }
         MyJwt myJwt = new MyJwt();
         myJwt.setCellphone(loginDto.getCellphone());
         String token = JwtHelper.createMyJwt(myJwt, base64Str);

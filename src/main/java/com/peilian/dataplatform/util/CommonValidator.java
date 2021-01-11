@@ -1,5 +1,7 @@
 package com.peilian.dataplatform.util;
 
+import com.peilian.dataplatform.config.BizException;
+import com.peilian.dataplatform.enums.CodeMsg;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
@@ -29,31 +31,30 @@ public class CommonValidator<T> {
     /**
      * 抛出校验异常
      *
-     * @param dto
+     * @param vo
      */
-    public void checkDto(T dto) {
-        String validateResult = check(dto);
+    public void checkDto(T vo) throws BizException {
+        String validateResult = check(vo);
         if (!CommonValidator.VALIDATION_SUCCESS.equals(validateResult)) {
-            log.error("校验失败：" + validateResult);
-            throw new IllegalArgumentException("校验失败：" + validateResult);
+            throw new BizException(validateResult);
         }
     }
 
     /**
      * 校验前端传来的数据对象
      *
-     * @param dto
+     * @param vo
      * @return String
      * @author zhengshangchao
      * @date 2020年2月12日
      */
-    private String check(T dto) {
-        Assert.notNull(dto, "对象为空");
+    private String check(T vo) {
+        Assert.notNull(vo, "对象为空");
         List<String> result = new ArrayList<>();
-        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(dto);
+        Set<ConstraintViolation<T>> violations = VALIDATOR.validate(vo);
         if (!violations.isEmpty()) {
             for (ConstraintViolation<T> va : violations) {
-                result.add(va.getInvalidValue() + ":" + va.getMessage());
+                result.add(va.getPropertyPath().toString() + ":" + va.getMessage());
             }
             return result.toString();
         }
